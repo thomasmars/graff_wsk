@@ -1,0 +1,102 @@
+.google-map-frame {
+  position: absolute;
+  top: 25%;
+  left: 65%;
+  width: 30%;
+  height: 50%;
+  padding: 1em;
+  border: 1px solid black;
+  background: #fff8e0;
+}
+
+.portrait .google-map-frame {
+  top: 10%;
+  left: 50%;
+  width: 45%;
+  height: 40%;
+}
+
+.google-map-frame-inner {
+  position: relative;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+  padding-bottom: 1px;
+  background-color: black;
+}
+
+.google-map {
+  position: relative;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.contact-info {
+  position: absolute;
+  left: 5%;
+  top: 25%;
+  height: auto;
+  background-color: #fff8e0;
+}
+
+.portrait .contact-info {
+  left: 1em;
+  top: 10%;
+}
+
+.contact-info-inner {
+  padding: 1em;
+  border: 1px solid black;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.contact-info-inner .contact-info-entry,
+.contact-info-inner .contact-info-header {
+  border: 1px solid black;
+  border-bottom: 0;
+  position: relative;
+}
+
+.contact-info-inner .contact-info-entry:last-child {
+  border-bottom: 1px solid black;
+}
+
+.contact-info-inner .contact-info-header {
+  padding: 0.5em;
+  text-transform: uppercase;
+}
+
+.contact-info-inner .text-field {
+  display: inline-block;
+  border-left: 1px solid black;
+  vertical-align: top;
+  position: absolute;
+  height: 100%;
+  padding: 0.5em;
+  box-sizing: border-box;
+}
+
+.contact-info-inner .text-field .text-field-header {
+  font-weight: bold;
+}
+
+.contact-info-inner .contact-info-icon {
+  display: inline-block;
+  width: 3.5em;
+  height: 3.5em;
+  -webkit-background-size: cover;
+  background-size: cover;
+}
+
+.contact-info-inner .contact-info-icon.home-icon {
+  background-image: url(../images/icons/home.png);
+}
+
+.contact-info-inner .contact-info-icon.instagram-icon {
+  background-image: url(../images/icons/instagram.png);
+}

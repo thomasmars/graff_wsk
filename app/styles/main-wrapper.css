@@ -1,0 +1,155 @@
+@font-face {
+  font-family: Jaapokki;
+  src: url('../fonts/Jaapokki/jaapokki-regular.eot'); /* IE9 Compat Modes */
+  src: url('../fonts/Jaapokki/jaapokki-regular.woff') format('woff'), /* Pretty Modern Browsers */
+  url('../fonts/Jaapokki/jaapokki-regular.ttf')  format('truetype'), /* Safari, Android, iOS */
+  url('../fonts/Jaapokki/jaapokki-regular.svg#svgFontName') format('svg'); /* Legacy iOS */
+}
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('../fonts/FontAwesome/fontawesome-webfont.eot?v=4.4.0');
+  src: url('../fonts/FontAwesome/fontawesome-webfont.eot?#iefix&v=4.4.0') format('embedded-opentype'),
+    url('../fonts/FontAwesome/fontawesome-webfont.woff2?v=4.4.0') format('woff2'),
+    url('../fonts/FontAwesome/fontawesome-webfont.woff?v=4.4.0') format('woff'),
+    url('../fonts/FontAwesome/fontawesome-webfont.ttf?v=4.4.0') format('truetype'),
+    url('../fonts/FontAwesome/fontawesome-webfont.svg?v=4.4.0#fontawesomeregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  overflow: hidden;
+  margin: 0;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+.portrait {
+}
+
+.wrapper {
+  position: relative;
+  -webkit-transform: translateY(0%);
+  -ms-transform: translateY(0%);
+  transform: translateY(0%);
+  -webkit-transition: 0.6s -webkit-transform ease-in;
+  transition: 0.6s transform ease-in;
+  height:100%;
+  width:100%;
+}
+
+.wrapper.touch-moving {
+  -webkit-transition: none;
+  transition: none;
+}
+
+.wrapper.show-products {
+  -webkit-transform: translateY(-100%);
+  -ms-transform: translateY(-100%);
+  transform: translateY(-100%);
+}
+
+.wrapper.show-contact {
+  -webkit-transform: translateY(-200%);
+  -ms-transform: translateY(-200%);
+  transform: translateY(-200%);
+}
+
+.home,
+.products,
+.contact {
+  position: absolute;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.products {
+  top: 100%;
+  background: #fff8e0;
+}
+
+.contact {
+  top: 200%;
+}
+
+.img-home,
+.img-contact,
+.img-products {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.img-home {
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.img-contact {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.portrait .img-contact {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+body .footer-inner {
+  -webkit-transition: background-color 0.8s ease-out;
+  transition: background-color 0.8s ease-out;
+}
+
+/* Color schemes */
+.footer-inner,
+.products-pages .back-to-product,
+.products-list .products-image-roll-arrow {
+  background: #F6AC26;
+}
+
+body.dunkel .footer-inner,
+.products-pages.product-dunkel .product-header .back-to-product {
+background-color: #915F2F;
+}
+
+body.helles .footer-inner,
+.products-pages.product-helles .product-header .back-to-product {
+  background-color: #E3A11F;
+}
+
+body.portland .footer-inner,
+.products-pages.product-portland .product-header .back-to-product {
+  background-color: #C77716;
+}
+
+body.redhead .footer-inner,
+.products-pages.product-redhead .product-header .back-to-product {
+  background-color: #B73B24;
+}
+
+body.session .footer-inner,
+.products-pages.product-session .product-header .back-to-product {
+  background-color: #14A29B;
+}
+
+body.stillehav .footer-inner,
+.products-pages.product-stillehav .product-header .back-to-product {
+  background-color: #219DB5;
+}
+
+body.stout .footer-inner,
+.products-pages.product-stout .product-header .back-to-product {
+  background-color: #523423;
+}

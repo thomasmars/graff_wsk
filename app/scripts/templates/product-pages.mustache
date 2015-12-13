@@ -1,0 +1,26 @@
+{{#beer-products}}
+  <div class="products-pages product-{{beer-name}}">
+    <div class="products-pages-inner">
+      <div class="product-info">
+        <div class="product-header">
+          <button class="back-to-product"></button>
+          <h2 class="product-title">{{product-title}}</h2>
+        </div>
+        <div class="info-field">
+          <div class="poetic-text">
+            {{{poetic-text}}}
+          </div>
+          <div class="info-list">
+            <div class="info-entry"><span class="entry-type">Alkoholprosent</span><span class="entry-value">{{alcohol-percentage}} %</span></div>
+            <div class="info-entry"><span class="entry-type">Type</span><span class="entry-value">{{type}}</span></div>
+            <div class="info-entry"><span class="entry-type">IBU / OG</span><span class="entry-value">{{IBU}} / {{OG}}°P</span></div>
+            <div class="info-entry"><span class="entry-type">Serveringstemperatur</span><span class="entry-value">{{serving-temperature}}°C</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="product-images">
+        <img src="images/etiketter/cropped/Graff_{{file-name}}.png">
+      </div>
+    </div>
+  </div>
+{{/beer-products}}

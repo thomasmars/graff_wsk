@@ -1,0 +1,118 @@
+{
+  "products": [
+    {
+      "category-name": "german",
+      "category-full-name": "German Lager Series",
+      "beer-products": [
+        {
+          "beer-name": "blonde",
+          "file-name": "Blonde-Ale",
+          "order": 1,
+          "poetic-text": "<b>LYS, TØRR</b> og forfriskende tørsteslukker fra Amerika<br>Kald og duggfrisk. Til sommerkvelden og alle andre kvelder.",
+          "product-title": "Blonde Ale",
+          "alcohol-percentage": "4,6",
+          "type": "Blonde Ale",
+          "IBU": 20,
+          "OG": "11,5",
+          "serving-temperature": "4 - 6"
+        },
+        {
+          "beer-name": "dunkel",
+          "file-name": "Dunkel",
+          "order": 2,
+          "poetic-text": "<b>TRADISJONELL PILS</b> fra Bayern. Mørk, rund og fyldig.<br>Tilbaketrukket bitterhet, fremtredende smak av brød og karamell.",
+          "product-title": "Münchener Dunkel",
+          "alcohol-percentage": "4,7",
+          "type": "Münchener Dunkel",
+          "IBU": 20,
+          "OG": "11,5",
+          "serving-temperature": "4 - 6"
+        },
+        {
+          "beer-name": "helles",
+          "file-name": "Helles",
+          "order": 3,
+          "poetic-text": "<b>EN BAYERSK</b> pils på tysk malt av aller beste kvalitet.<br>Tørr og balansert bitterhet. Som skorpen på et nystekt landbrød.",
+          "product-title": "Münchener Helles",
+          "alcohol-percentage": "4,4",
+          "type": "Münchener Helles",
+          "IBU": 19,
+          "OG": "11,6",
+          "serving-temperature": "4 - 6"
+        }
+      ]
+    },
+    {
+      "category-name": "american",
+      "category-full-name": "American Ale Series",
+      "beer-products": [
+        {
+          "beer-name": "portland",
+          "file-name": "Portland",
+          "order": 4,
+          "poetic-text": "<b>HUMLEKARAKTEREN</b> i vår Pale Ale er klassisk vestkyst.<br>Det friske og fuktige balanseres av en forsiktig karamellsødme.",
+          "product-title": "Portland Pale Ale",
+          "alcohol-percentage": "4,7",
+          "type": "Pale Ale",
+          "IBU": 31,
+          "OG": "11,8",
+          "serving-temperature": "6 - 8"
+        },
+        {
+          "beer-name": "redhead",
+          "file-name": "Red-Head",
+          "order": 5,
+          "poetic-text": "<b>GYLLENRØD</b> som kveldssolen over Stillehavets strender.<br>Skummet tykt og hvitt. Dempet bitterhet, tydelig humlearoma. God.",
+          "product-title": "Red Head Red Ale",
+          "alcohol-percentage": "5,9",
+          "type": "Red Ale",
+          "IBU": 34,
+          "OG": "14,3",
+          "serving-temperature": "8 - 10"
+        },
+        {
+          "beer-name": "session",
+          "file-name": "Session-IPA",
+          "order": 6,
+          "poetic-text": "<b>KLASSISK VESTKYST,</b> frisk smak av sitrus og grapefrukt.<br>En tydelig humlekarakter. Samtidig mild og lett - <i>sessionable</i>.",
+          "product-title": "Session IPA",
+          "alcohol-percentage": "4,7",
+          "type": "Session IPA",
+          "IBU": 37,
+          "OG": "11,2",
+          "serving-temperature": "6 - 8"
+        },
+        {
+          "beer-name": "stillehav",
+          "file-name": "Stille-Hav",
+          "order": 7,
+          "poetic-text": "<b>SELV I STILLE VÆR</b> er Stillehavet brølende, skummende.<br>Stille Hav syder av frisk sitrusfrukt. Velkommen til Vestkysten.",
+          "product-title": "Stille Hav IPA",
+          "alcohol-percentage": "6,7",
+          "type": "India Pale Ale",
+          "IBU": 55,
+          "OG": "16,1",
+          "serving-temperature": "8 - 10"
+        }
+      ]
+    },
+    {
+      "category-name": "other",
+      "category-full-name": "Others",
+      "beer-products": [
+        {
+          "beer-name": "stout",
+          "file-name": "Dry-Stout",
+          "order": 8,
+          "poetic-text": "<b>KULLSORT ØL.</b> Tykt, kremet skum. Smak av brent malt.<br>Overrasker ved å være en tørr og forfriskende tørsteslukker.",
+          "product-title": "Dry Stout",
+          "alcohol-percentage": "4,4",
+          "type": "Dry Stout",
+          "IBU": 31,
+          "OG": "10,9",
+          "serving-temperature": "6 - 8"
+        }
+      ]
+    }
+  ]
+}

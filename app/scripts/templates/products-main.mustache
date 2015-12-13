@@ -1,0 +1,26 @@
+<div class="products-list">
+  <div class="products-display">
+    <div class="controls-filter">
+      <div class="filter-series">
+        <button class="filter button-all selected" data-filter="all">ALL</button>
+        {{#products}}
+          <button class="filter button-{{category-name}}" data-filter=".products-{{category-name}}">{{category-full-name}}</button>
+        {{/products}}
+      </div>
+    </div>
+    <div class="products-display-inner">
+      <div class="products-image-roll">
+        <div class="products-image-roll-arrow left hiding hidden"></div>
+        <div class="products-image-roll-arrow right hiding hidden"></div>
+        <div class="products-image-roll-inner">
+          {{#products}}
+            {{> image-roll}}
+          {{/products}}
+        </div>
+      </div>
+    </div>
+  </div>
+  {{#products}}
+    {{> product-pages}}
+  {{/products}}
+</div>
