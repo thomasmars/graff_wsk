@@ -1,7 +1,7 @@
 /**
  * Created by thoma_000 on 15.11.2015.
  */
-define(['jquery'], function ($) {
+(function ($) {
   /**
    * @param {jquery} $wrapper Wrapper
    * @param {SlideControls} slideControls Slide controls object
@@ -96,4 +96,4 @@ define(['jquery'], function ($) {
   };
 
   return TouchControls;
-});
+})();

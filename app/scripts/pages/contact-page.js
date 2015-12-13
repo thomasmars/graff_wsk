@@ -1,7 +1,7 @@
 /**
  * Created by thoma_000 on 01.10.2015.
  */
-define(['jquery', 'google-maps'], function ($) {
+(function ($) {
 
   var ContactPage = function () {
     this.initGoogleMap();
@@ -43,4 +43,4 @@ define(['jquery', 'google-maps'], function ($) {
 
   return ContactPage;
 
-});
+})();

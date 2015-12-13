@@ -1,7 +1,7 @@
 /**
  * Created by thoma_000 on 19.09.2015.
  */
-define(['jquery'], function ($) {
+(function ($) {
 
   var SlideControls = function ($wrapper) {
     var self = this;
@@ -41,4 +41,4 @@ define(['jquery'], function ($) {
   };
 
   return SlideControls;
-});
+})();

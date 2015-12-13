@@ -1,7 +1,7 @@
 /**
  * Created by thoma_000 on 17.11.2015.
  */
-define(['jquery', 'mix-it-up'], function ($) {
+module.exports = function ($) {
 
 
   var ResourceLoader = function () {
@@ -77,4 +77,4 @@ define(['jquery', 'mix-it-up'], function ($) {
   };
 
   return ResourceLoader;
-});
+};

@@ -2,7 +2,7 @@
 /**
  * Created by Thomas Marstrander on 20.08.2015.
  */
-define(function (require) {
+(function () {
   var $ = require('jquery');
   var Mustache = require('mustache');
   var SlideControls = require('./slide-controls');
@@ -44,13 +44,14 @@ define(function (require) {
     var $wrapper = $('.wrapper');
 
     // Load images and clones
-    var resourceLoader = new ResourceLoader().init();
+    var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
     $.getJSON('data/products.json', function (view) {
 
       // Render product page template
-      $(Mustache.render(productsMain, view, {
+      console.log("products main", productsMain);
+      $(productsMain(view, {
         'image-roll': imageRoll,
         'product-pages': productPages
       }))
@@ -96,14 +97,14 @@ define(function (require) {
   });
 
 
-});
+})();
 
 },{"../pages/contact-page":7,"../pages/products-page":8,"../templates/image-roll.mustache":9,"../templates/product-pages.mustache":10,"../templates/products-main.mustache":11,"./header":2,"./resource-loader":3,"./slide-controls":4,"./touch-controls":5,"jquery":15,"mustache":16}],2:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
 
-define(['jquery'], function ($) {
+(function ($) {
 
   /**
    *
@@ -139,13 +140,13 @@ define(['jquery'], function ($) {
 
   return GraffHeader;
 
-});
+})();
 
 },{}],3:[function(require,module,exports){
 /**
  * Created by thoma_000 on 17.11.2015.
  */
-define(['jquery', 'mix-it-up'], function ($) {
+module.exports = function ($) {
 
 
   var ResourceLoader = function () {
@@ -221,13 +222,13 @@ define(['jquery', 'mix-it-up'], function ($) {
   };
 
   return ResourceLoader;
-});
+};
 
 },{}],4:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
-define(['jquery'], function ($) {
+(function ($) {
 
   var SlideControls = function ($wrapper) {
     var self = this;
@@ -267,13 +268,13 @@ define(['jquery'], function ($) {
   };
 
   return SlideControls;
-});
+})();
 
 },{}],5:[function(require,module,exports){
 /**
  * Created by thoma_000 on 15.11.2015.
  */
-define(['jquery'], function ($) {
+(function ($) {
   /**
    * @param {jquery} $wrapper Wrapper
    * @param {SlideControls} slideControls Slide controls object
@@ -368,7 +369,7 @@ define(['jquery'], function ($) {
   };
 
   return TouchControls;
-});
+})();
 
 },{}],6:[function(require,module,exports){
 /*!
@@ -460,7 +461,7 @@ define(['jquery'], function ($) {
 /**
  * Created by thoma_000 on 01.10.2015.
  */
-define(['jquery', 'google-maps'], function ($) {
+(function ($) {
 
   var ContactPage = function () {
     this.initGoogleMap();
@@ -502,13 +503,13 @@ define(['jquery', 'google-maps'], function ($) {
 
   return ContactPage;
 
-});
+})();
 
 },{}],8:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
-define(['jquery'], function ($) {
+(function ($) {
 
   var ProductsPage = function (beerData) {
     var self = this;
@@ -923,7 +924,7 @@ define(['jquery'], function ($) {
 
   return ProductsPage;
 
-});
+})();
 
 },{}],9:[function(require,module,exports){
 var hogan = require("hogan.js");var n = new hogan.Template({code: function (c,p,i) { var t=this;t.b(i=i||"");if(t.s(t.f("beer-products",c,p,1),c,p,0,18,303,"{{ }}")){t.rs(c,p,function(c,p,t){t.b("  <div class=\"mix products-");t.b(t.v(t.f("category-name",c,p,0)));t.b(" img-product-");t.b(t.v(t.f("beer-name",c,p,0)));t.b("\" data-my-order=\"");t.b(t.v(t.f("order",c,p,0)));t.b("\">");t.b("\n" + i);t.b("    <div class=\"loader-container\">");t.b("\n" + i);t.b("      <div class=\"loader\"></div>");t.b("\n" + i);t.b("    </div>");t.b("\n" + i);t.b("    <img src=\"images/etiketter/cropped/Graff_");t.b(t.v(t.f("file-name",c,p,0)));t.b(".png\">");t.b("\n" + i);t.b("    <div class=\"overlay\"></div>");t.b("\n" + i);t.b("  </div>");t.b("\n" + i);});c.pop();}return t.fl(); },partials: {}, subs: {  }});module.exports = function(data, partials) {return n.render(data, partials)}

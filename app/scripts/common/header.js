@@ -2,7 +2,7 @@
  * Created by thoma_000 on 19.09.2015.
  */
 
-define(['jquery'], function ($) {
+(function ($) {
 
   /**
    *
@@ -38,4 +38,4 @@ define(['jquery'], function ($) {
 
   return GraffHeader;
 
-});
+})();

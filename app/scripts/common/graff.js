@@ -1,7 +1,7 @@
 /**
  * Created by Thomas Marstrander on 20.08.2015.
  */
-define(function (require) {
+(function () {
   var $ = require('jquery');
   var Mustache = require('mustache');
   var SlideControls = require('./slide-controls');
@@ -43,13 +43,16 @@ define(function (require) {
     var $wrapper = $('.wrapper');
 
     // Load images and clones
-    var resourceLoader = new ResourceLoader().init();
+    var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
     $.getJSON('data/products.json', function (view) {
 
       // Render product page template
-      $(Mustache.render(productsMain, view, {
+      console.log("products main", productsMain);
+      console.log("image roll", imageRoll);
+      console.log("products page", productPages);
+      $(productsMain(view, {
         'image-roll': imageRoll,
         'product-pages': productPages
       }))
@@ -95,4 +98,4 @@ define(function (require) {
   });
 
 
-});
+})();

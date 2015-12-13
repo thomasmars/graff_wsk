@@ -44,6 +44,8 @@ var browserify = require('browserify');
 var watchify = require('watchify');
 var source = require('vinyl-source-stream');
 
+var dist = false; // set to true when `default` task is run
+
 // Lint JavaScript
 gulp.task('lint', () =>
   gulp.src('app/scripts/**/*.js')
@@ -107,7 +109,8 @@ gulp.task('styles', () => {
       precision: 10
     }).on('error', $.sass.logError))
     .pipe($.autoprefixer(AUTOPREFIXER_BROWSERS))
-    .pipe(gulp.dest('.tmp/styles'))
+    .pipe($.concat('style.min.css'))
+    .pipe(gulp.dest('./app/build'))
     // Concatenate and minify styles
     .pipe($.if('*.css', $.minifyCss()))
     .pipe($.size({title: 'styles'}))
@@ -118,7 +121,6 @@ gulp.task('styles', () => {
 /**
  * BROWSERIFY / WATCHIFY TASK ADDED HERE
  */
-var dist = false; // set to true when `default` task is run
 gulp.task('watchify', function(){
   var bundler = browserify('./app/scripts/main.js');
   var bundle = function() {

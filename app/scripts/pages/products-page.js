@@ -1,7 +1,7 @@
 /**
  * Created by thoma_000 on 19.09.2015.
  */
-define(['jquery'], function ($) {
+(function ($) {
 
   var ProductsPage = function (beerData) {
     var self = this;
@@ -416,4 +416,4 @@ define(['jquery'], function ($) {
 
   return ProductsPage;
 
-});
+})();
