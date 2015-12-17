@@ -3,7 +3,6 @@
  */
 (function () {
   var $ = require('jquery');
-  var Mustache = require('mustache');
   var SlideControls = require('./slide-controls');
   var GraffHeader = require('./header');
   var ResourceLoader = require('./resource-loader');
@@ -43,16 +42,14 @@
     var $wrapper = $('.wrapper');
 
     // Load images and clones
+    console.log("ResourceLoader", ResourceLoader);
     var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
     $.getJSON('data/products.json', function (view) {
 
       // Render product page template
-      console.log("products main", productsMain);
-      console.log("image roll", imageRoll);
-      console.log("products page", productPages);
-      $(productsMain(view, {
+      $(productsMain.render(view, {
         'image-roll': imageRoll,
         'product-pages': productPages
       }))
@@ -61,6 +58,7 @@
         .then(function () {
 
           // Init mix it up
+          console.log(resourceLoader);
           resourceLoader.initMixItUp();
 
 

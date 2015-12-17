@@ -26,6 +26,8 @@ body {
   height: 100%;
   width: 100%;
   position: absolute;
+  font-family: Jaapokki, sans-serif;
+  color: #000;
 }
 
 .portrait {
@@ -40,6 +42,7 @@ body {
   transition: 0.6s transform ease-in;
   height:100%;
   width:100%;
+  background: #fff8e0;
 }
 
 .wrapper.touch-moving {

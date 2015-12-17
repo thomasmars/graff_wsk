@@ -4,7 +4,6 @@
  */
 (function () {
   var $ = require('jquery');
-  var Mustache = require('mustache');
   var SlideControls = require('./slide-controls');
   var GraffHeader = require('./header');
   var ResourceLoader = require('./resource-loader');
@@ -44,14 +43,14 @@
     var $wrapper = $('.wrapper');
 
     // Load images and clones
+    console.log("ResourceLoader", ResourceLoader);
     var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
     $.getJSON('data/products.json', function (view) {
 
       // Render product page template
-      console.log("products main", productsMain);
-      $(productsMain(view, {
+      $(productsMain.render(view, {
         'image-roll': imageRoll,
         'product-pages': productPages
       }))
@@ -60,6 +59,7 @@
         .then(function () {
 
           // Init mix it up
+          console.log(resourceLoader);
           resourceLoader.initMixItUp();
 
 
@@ -99,279 +99,271 @@
 
 })();
 
-},{"../pages/contact-page":7,"../pages/products-page":8,"../templates/image-roll.mustache":9,"../templates/product-pages.mustache":10,"../templates/products-main.mustache":11,"./header":2,"./resource-loader":3,"./slide-controls":4,"./touch-controls":5,"jquery":15,"mustache":16}],2:[function(require,module,exports){
+},{"../pages/contact-page":7,"../pages/products-page":8,"../templates/image-roll.mustache":9,"../templates/product-pages.mustache":10,"../templates/products-main.mustache":11,"./header":2,"./resource-loader":3,"./slide-controls":4,"./touch-controls":5,"jquery":13}],2:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
 
-(function ($) {
+var $ = require('jquery');
+/**
+ *
+ * @param $wrapper
+ * @param {ProductsPage} productsPage
+ * @constructor
+ */
+var GraffHeader = function ($wrapper, productsPage) {
+  this.$wrapper = $wrapper;
+  this.productsPage = productsPage;
+  this.initClickListeners();
+};
 
-  /**
-   *
-   * @param $wrapper
-   * @param {ProductsPage} productsPage
-   * @constructor
-   */
-  var GraffHeader = function ($wrapper, productsPage) {
-    this.$wrapper = $wrapper;
-    this.productsPage = productsPage;
-    this.initClickListeners();
-  };
+GraffHeader.prototype.initClickListeners = function () {
+  var self = this;
 
-  GraffHeader.prototype.initClickListeners = function () {
-    var self = this;
+  $('.button-home, .img-logo').click(function () {
+    self.$wrapper.removeClass('show-products').removeClass('show-contact');
+    self.productsPage.removeFooterColor();
+  });
 
-    $('.button-home, .img-logo').click(function () {
-      self.$wrapper.removeClass('show-products').removeClass('show-contact');
-      self.productsPage.removeFooterColor();
-    });
+  $('.button-products').click(function () {
+    self.$wrapper.removeClass('show-contact').addClass('show-products');
+    self.productsPage.removeFooterColor();
+    self.productsPage.goHome();
+  });
 
-    $('.button-products').click(function () {
-      self.$wrapper.removeClass('show-contact').addClass('show-products');
-      self.productsPage.removeFooterColor();
-      self.productsPage.goHome();
-    });
+  $('.button-contact').click(function () {
+    self.$wrapper.removeClass('show-products').addClass('show-contact');
+    self.productsPage.removeFooterColor();
+  });
+};
 
-    $('.button-contact').click(function () {
-      self.$wrapper.removeClass('show-products').addClass('show-contact');
-      self.productsPage.removeFooterColor();
-    });
-  };
+module.exports = GraffHeader;
 
-  return GraffHeader;
-
-})();
-
-},{}],3:[function(require,module,exports){
+},{"jquery":13}],3:[function(require,module,exports){
 /**
  * Created by thoma_000 on 17.11.2015.
  */
-module.exports = function ($) {
+var $ = require('jquery');
+var ResourceLoader = function () {
+  var self = this;
 
-
-  var ResourceLoader = function () {
-    var self = this;
-
-    self.initMixItUp = function () {
-      $('.products-display').mixItUp({
-        animation: {
-          effects: 'fade'
-        }
-      });
-    };
-
-    $(window).on('touchmove', function (e) {
-      e.preventDefault();
-    });
-
-    var imageResize = function ($img) {
-
-      var natWidth = $img.get(0).naturalWidth;
-      var natHeight = $img.get(0).naturalHeight;
-      var imgRatio = natWidth / natHeight;
-
-      var width = $(window).width();
-      var height = $(window).height();
-      var windowRatio = width / height;
-
-      if (imgRatio > windowRatio) {
-        // Must scale image to wrapper height
-        $img.css({
-          'height': height,
-          'width': 'auto',
-          'top': ''
-        });
-      } else {
-        // Height too big, must center image
-        var newHeight = width / imgRatio;
-
-        // Remove top height
-/*        var top = newHeight - height;
-        if ($img.hasClass('img-contact')) {
-          // Add 10 %
-          top -= (newHeight / 9);
-        }*/
-
-        $img.css({
-          'width': width,
-          'height': 'auto'
-/*          'top': -top*/
-        })
+  self.initMixItUp = function () {
+/*    $('.products-display').mixItUp({
+      animation: {
+        effects: 'fade'
       }
-    };
+    });*/
+  };
 
-    var initMainImagesLoad = function () {
-      var $mainImages = $('.img-home, .img-contact');
+  $(window).on('touchmove', function (e) {
+    e.preventDefault();
+  });
 
-      var resizeImages = function () {
-        $mainImages.each(function () {
-          imageResize($(this));
-        });
-      };
+  var imageResize = function ($img) {
 
-      resizeImages();
-      $(window).resize(function () {
-        resizeImages();
+    var natWidth = $img.get(0).naturalWidth;
+    var natHeight = $img.get(0).naturalHeight;
+    var imgRatio = natWidth / natHeight;
+
+    var width = $(window).width();
+    var height = $(window).height();
+    var windowRatio = width / height;
+
+    if (imgRatio > windowRatio) {
+      // Must scale image to wrapper height
+      $img.css({
+        'height': height,
+        'width': 'auto',
+        'top': ''
       });
-    };
+    } else {
+      // Height too big, must center image
+      var newHeight = width / imgRatio;
 
-    self.init = function () {
-      initMainImagesLoad();
-      return self;
+      // Remove top height
+/*        var top = newHeight - height;
+      if ($img.hasClass('img-contact')) {
+        // Add 10 %
+        top -= (newHeight / 9);
+      }*/
+
+      $img.css({
+        'width': width,
+        'height': 'auto'
+/*          'top': -top*/
+      })
     }
   };
 
-  return ResourceLoader;
+  var initMainImagesLoad = function () {
+    var $mainImages = $('.img-home, .img-contact');
+
+    var resizeImages = function () {
+      $mainImages.each(function () {
+        imageResize($(this));
+      });
+    };
+
+    resizeImages();
+    $(window).resize(function () {
+      resizeImages();
+    });
+  };
+
+  self.init = function () {
+    initMainImagesLoad();
+    return self;
+  }
 };
 
-},{}],4:[function(require,module,exports){
+module.exports = ResourceLoader;
+
+},{"jquery":13}],4:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
-(function ($) {
+var $ = require('jquery');
+var SlideControls = function ($wrapper) {
+  var self = this;
+  this.$wrapper = $wrapper;
+  this.initKeyboardListeners();
+};
 
-  var SlideControls = function ($wrapper) {
-    var self = this;
-    this.$wrapper = $wrapper;
-    this.initKeyboardListeners();
-  };
-
-  SlideControls.prototype.initKeyboardListeners = function () {
-    var self = this;
-    $(window).keydown(function (e) {
-      if (e.which === 40) { // Arrow down
-        self.slideDown();
-      } else if (e.which === 38) { // Arrow up
-        self.slideUp();
-      }
-    })
-  };
-
-  SlideControls.prototype.slideDown = function () {
-    if (this.$wrapper.hasClass('show-contact')) {
-      return;
-    } else if (this.$wrapper.hasClass('show-products')) {
-      this.$wrapper.removeClass('show-products').addClass('show-contact');
-    } else {
-      this.$wrapper.addClass('show-products');
+SlideControls.prototype.initKeyboardListeners = function () {
+  var self = this;
+  $(window).keydown(function (e) {
+    if (e.which === 40) { // Arrow down
+      self.slideDown();
+    } else if (e.which === 38) { // Arrow up
+      self.slideUp();
     }
-    $('body').trigger('changed-slide');
-  };
+  })
+};
 
-  SlideControls.prototype.slideUp = function () {
-    if (this.$wrapper.hasClass('show-contact')) {
-      this.$wrapper.removeClass('show-contact').addClass('show-products');
-    } else if (this.$wrapper.hasClass('show-products')) {
-      this.$wrapper.removeClass('show-products');
-    }
-    $('body').trigger('changed-slide');
-  };
+SlideControls.prototype.slideDown = function () {
+  if (this.$wrapper.hasClass('show-contact')) {
+    return;
+  } else if (this.$wrapper.hasClass('show-products')) {
+    this.$wrapper.removeClass('show-products').addClass('show-contact');
+  } else {
+    this.$wrapper.addClass('show-products');
+  }
+  $('body').trigger('changed-slide');
+};
 
-  return SlideControls;
-})();
+SlideControls.prototype.slideUp = function () {
+  if (this.$wrapper.hasClass('show-contact')) {
+    this.$wrapper.removeClass('show-contact').addClass('show-products');
+  } else if (this.$wrapper.hasClass('show-products')) {
+    this.$wrapper.removeClass('show-products');
+  }
+  $('body').trigger('changed-slide');
+};
 
-},{}],5:[function(require,module,exports){
+module.exports = SlideControls;
+
+},{"jquery":13}],5:[function(require,module,exports){
 /**
  * Created by thoma_000 on 15.11.2015.
  */
-(function ($) {
-  /**
-   * @param {jquery} $wrapper Wrapper
-   * @param {SlideControls} slideControls Slide controls object
-   * @param [touchMoveDelay] Wait an amount of miliseconds before moving with touch listener in case of touch click
-   * @param [touchMovePercentageThreshold] The percentage of a page that must be moved before a page will change
-   * @constructor
-   */
-  var TouchControls = function ($wrapper, slideControls, touchMoveDelay, touchMovePercentageThreshold) {
-    this.$wrapper = $wrapper;
-    this.slideControls = slideControls;
-    touchMoveDelay = touchMoveDelay || 100;
-    touchMovePercentageThreshold = touchMovePercentageThreshold || 20;
-    this.initTouchListeners(touchMoveDelay, touchMovePercentageThreshold);
-  };
 
-  TouchControls.prototype.initTouchListeners = function (touchMoveDelay, touchMovePercentageThreshold) {
-    var self = this;
-    this.touchStartY = 0;
-    this.currentTranslateY = 0;
-    this.touchDiffPercentage = 0;
-    this.touchStartTime = 0;
-    this.startedMoving = false;
+var $ = require('jquery');
+/**
+ * @param {jquery} $wrapper Wrapper
+ * @param {SlideControls} slideControls Slide controls object
+ * @param [touchMoveDelay] Wait an amount of miliseconds before moving with touch listener in case of touch click
+ * @param [touchMovePercentageThreshold] The percentage of a page that must be moved before a page will change
+ * @constructor
+ */
+var TouchControls = function ($wrapper, slideControls, touchMoveDelay, touchMovePercentageThreshold) {
+  this.$wrapper = $wrapper;
+  this.slideControls = slideControls;
+  touchMoveDelay = touchMoveDelay || 100;
+  touchMovePercentageThreshold = touchMovePercentageThreshold || 20;
+  this.initTouchListeners(touchMoveDelay, touchMovePercentageThreshold);
+};
 
-    // Touch start
-    $(window).on('touchstart', function (e) {
-      self.touchStartTime = new Date().getTime();
+TouchControls.prototype.initTouchListeners = function (touchMoveDelay, touchMovePercentageThreshold) {
+  var self = this;
+  this.touchStartY = 0;
+  this.currentTranslateY = 0;
+  this.touchDiffPercentage = 0;
+  this.touchStartTime = 0;
+  this.startedMoving = false;
 
-      self.currentTranslateY = 0;
-      if (self.$wrapper.hasClass('show-products')) {
-        self.currentTranslateY = -100;
-      } else if (self.$wrapper.hasClass('show-contact')) {
-        self.currentTranslateY = -200;
+  // Touch start
+  $(window).on('touchstart', function (e) {
+    self.touchStartTime = new Date().getTime();
+
+    self.currentTranslateY = 0;
+    if (self.$wrapper.hasClass('show-products')) {
+      self.currentTranslateY = -100;
+    } else if (self.$wrapper.hasClass('show-contact')) {
+      self.currentTranslateY = -200;
+    }
+    self.touchStartY = e.originalEvent.touches[0].pageY;
+  }).on('touchmove', function (e) {
+    if (!self.startedMoving) {
+      var timeElapsed = (new Date().getTime()) - self.touchStartTime;
+      if (timeElapsed > touchMoveDelay) {
+        self.startedMoving = true;
+      } else {
+        return;
       }
-      self.touchStartY = e.originalEvent.touches[0].pageY;
-    }).on('touchmove', function (e) {
-      if (!self.startedMoving) {
-        var timeElapsed = (new Date().getTime()) - self.touchStartTime;
-        if (timeElapsed > touchMoveDelay) {
-          self.startedMoving = true;
-        } else {
-          return;
-        }
-      }
-      self.$wrapper.addClass('touch-moving');
-      console.log("moving, current translateY", self.currentTranslateY);
+    }
+    self.$wrapper.addClass('touch-moving');
+    console.log("moving, current translateY", self.currentTranslateY);
 
-      var touchCurrentY = e.originalEvent.touches[0].pageY;
-      var touchDiff = touchCurrentY - self.touchStartY;
-      self.touchDiffPercentage = (touchDiff / self.$wrapper.height()) * 100;
-      if (self.touchDiffPercentage > 100) {
-        self.touchDiffPercentage = 100;
-      } else if (self.touchDiffPercentage < -100) {
-        self.touchDiffPercentage = -100;
-      }
-      var newTouchPercentage = self.currentTranslateY + self.touchDiffPercentage;
-      console.log("newtouch percentage", newTouchPercentage);
-      var maxTouchPercentage = (self.$wrapper.children().length - 1) * -100;
-      console.log("max touch percentage", maxTouchPercentage);
+    var touchCurrentY = e.originalEvent.touches[0].pageY;
+    var touchDiff = touchCurrentY - self.touchStartY;
+    self.touchDiffPercentage = (touchDiff / self.$wrapper.height()) * 100;
+    if (self.touchDiffPercentage > 100) {
+      self.touchDiffPercentage = 100;
+    } else if (self.touchDiffPercentage < -100) {
+      self.touchDiffPercentage = -100;
+    }
+    var newTouchPercentage = self.currentTranslateY + self.touchDiffPercentage;
+    console.log("newtouch percentage", newTouchPercentage);
+    var maxTouchPercentage = (self.$wrapper.children().length - 1) * -100;
+    console.log("max touch percentage", maxTouchPercentage);
 
-      // Do not allow scrolling out of content
-      if (newTouchPercentage > 0) {
-        newTouchPercentage = 0;
-      }
-      else if (newTouchPercentage < maxTouchPercentage) {
-        newTouchPercentage = maxTouchPercentage;
-      }
-      console.log("new touch percentage", newTouchPercentage);
+    // Do not allow scrolling out of content
+    if (newTouchPercentage > 0) {
+      newTouchPercentage = 0;
+    }
+    else if (newTouchPercentage < maxTouchPercentage) {
+      newTouchPercentage = maxTouchPercentage;
+    }
+    console.log("new touch percentage", newTouchPercentage);
 
-      self.$wrapper.css({
-        '-webkit-transform': 'translateY(' + newTouchPercentage + '%)',
-        transform: 'translateY(' + newTouchPercentage + '%)'
-      });
-
-    }).on('touchend', function (e) {
-      if (!self.startedMoving) {
-        return
-      }
-
-      self.$wrapper.removeClass('touch-moving').css({
-        '-webkit-transform': '',
-        transform: ''
-      });
-      if (self.touchDiffPercentage > touchMovePercentageThreshold) {
-        self.slideControls.slideUp();
-      } else if (self.touchDiffPercentage < -touchMovePercentageThreshold) {
-        self.slideControls.slideDown();
-      }
-
-      // Get ready for next touch event
-      self.startedMoving = false;
+    self.$wrapper.css({
+      '-webkit-transform': 'translateY(' + newTouchPercentage + '%)',
+      transform: 'translateY(' + newTouchPercentage + '%)'
     });
-  };
 
-  return TouchControls;
-})();
+  }).on('touchend', function (e) {
+    if (!self.startedMoving) {
+      return
+    }
 
-},{}],6:[function(require,module,exports){
+    self.$wrapper.removeClass('touch-moving').css({
+      '-webkit-transform': '',
+      transform: ''
+    });
+    if (self.touchDiffPercentage > touchMovePercentageThreshold) {
+      self.slideControls.slideUp();
+    } else if (self.touchDiffPercentage < -touchMovePercentageThreshold) {
+      self.slideControls.slideDown();
+    }
+
+    // Get ready for next touch event
+    self.startedMoving = false;
+  });
+};
+
+module.exports = TouchControls;
+
+},{"jquery":13}],6:[function(require,module,exports){
 /*!
  *
  *  Web Starter Kit
@@ -461,926 +453,472 @@ module.exports = function ($) {
 /**
  * Created by thoma_000 on 01.10.2015.
  */
-(function ($) {
+var $ = require('jquery');
+var ContactPage = function () {
+  this.initGoogleMap();
+};
 
-  var ContactPage = function () {
-    this.initGoogleMap();
+ContactPage.prototype.initGoogleMap = function () {
+  // Init google maps
+  var $map = $('.google-map');
+  var mapOptions = {
+    center: new google.maps.LatLng(69.6532027, 18.9602434),
+    zoom: 13,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
-  ContactPage.prototype.initGoogleMap = function () {
-    // Init google maps
-    var $map = $('.google-map');
-    var mapOptions = {
-      center: new google.maps.LatLng(69.6532027, 18.9602434),
-      zoom: 13,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
-
-    var request = {
-      placeId: 'ChIJSynjsFPExEURtEOBL_BSAmI'  // Graff Brygghus Storgata 101, 9008 Tromsø
-    };
-
-    var googleMap = new google.maps.Map($map.get(0), mapOptions);
-    var infowindow = new google.maps.InfoWindow();
-
-    var service = new google.maps.places.PlacesService(googleMap);
-    service.getDetails(request, function (place, status) {
-      if (status == google.maps.places.PlacesServiceStatus.OK) {
-        // If the request succeeds, draw the place location on the map
-        // as a marker, and register an event to handle a click on the marker.
-        var marker = new google.maps.Marker({
-          map: googleMap,
-          position: place.geometry.location
-        });
-
-        google.maps.event.addListener(marker, 'click', function() {
-          infowindow.setContent(place.name);
-          infowindow.open(googleMap, this);
-        });
-      }
-    });
+  var request = {
+    placeId: 'ChIJSynjsFPExEURtEOBL_BSAmI'  // Graff Brygghus Storgata 101, 9008 Tromsø
   };
 
-  return ContactPage;
+  var googleMap = new google.maps.Map($map.get(0), mapOptions);
+  var infowindow = new google.maps.InfoWindow();
 
-})();
+  var service = new google.maps.places.PlacesService(googleMap);
+  service.getDetails(request, function (place, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      // If the request succeeds, draw the place location on the map
+      // as a marker, and register an event to handle a click on the marker.
+      var marker = new google.maps.Marker({
+        map: googleMap,
+        position: place.geometry.location
+      });
 
-},{}],8:[function(require,module,exports){
+      google.maps.event.addListener(marker, 'click', function() {
+        infowindow.setContent(place.name);
+        infowindow.open(googleMap, this);
+      });
+    }
+  });
+};
+
+module.exports = ContactPage;
+
+
+},{"jquery":13}],8:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
-(function ($) {
+var $ = require('jquery');
+var ProductsPage = function (beerData) {
+  var self = this;
 
-  var ProductsPage = function (beerData) {
-    var self = this;
+  this.currentIndex = 0;
+  this.$mixItUp = $('.products-display');
+  this.$productsList = $('.products-list');
+  this.totalProductPages = $('.products-pages').length;
+  this.$innerImageRoll = this.$productsList.find('.products-image-roll-inner');
+  this.$imageRollArrowLeft = this.$productsList.find('.products-image-roll-arrow.left');
+  this.$imageRollArrowRight = this.$productsList.find('.products-image-roll-arrow.right');
+  this.currentImageRollIndex = 0;
+  this.clonesLoaded = false;
 
-    this.currentIndex = 0;
-    this.$mixItUp = $('.products-display');
-    this.$productsList = $('.products-list');
-    this.totalProductPages = $('.products-pages').length;
-    this.$innerImageRoll = this.$productsList.find('.products-image-roll-inner');
-    this.$imageRollArrowLeft = this.$productsList.find('.products-image-roll-arrow.left');
-    this.$imageRollArrowRight = this.$productsList.find('.products-image-roll-arrow.right');
-    this.currentImageRollIndex = 0;
-    this.clonesLoaded = false;
+  this.initFilterButtons();
 
-    this.initFilterButtons();
+  this.initImageButtons();
+  this.initProductsButtons();
 
-    this.initImageButtons();
-    this.initProductsButtons();
+  this.beerClasses = this.getBeerClasses(beerData);
 
-    this.beerClasses = this.getBeerClasses(beerData);
+  self.setMinHeightInnerRoll = function () {
+    var $innerRoll = $('.products-image-roll-inner');
+    var minSize = $innerRoll.children('.mix').height();
 
-    self.setMinHeightInnerRoll = function () {
-      var $innerRoll = $('.products-image-roll-inner');
-      var minSize = $innerRoll.children('.mix').height();
+    // Set height of inner container
+    $innerRoll.css('min-height', minSize + 'px');
+  };
 
-      // Set height of inner container
-      $innerRoll.css('min-height', minSize + 'px');
-    };
+  setTimeout(function () {
+    self.initImageRollButtons();
 
-    setTimeout(function () {
+    // Reinit image roll buttons when done mixing
+    self.$mixItUp.on('mixEnd', function () {
       self.initImageRollButtons();
 
-      // Reinit image roll buttons when done mixing
-      self.$mixItUp.on('mixEnd', function () {
-        self.initImageRollButtons();
-
-        // Unset height of inner container
-        $('.products-image-roll-inner').css('height', '');
-        self.resizeProductRoll();
-      });
-
-      self.$mixItUp.on('mixLoad', function () {
-        self.setMinHeightInnerRoll();
-      });
-
-      self.$mixItUp.on('mixStart', function () {
-        self.setMinHeightInnerRoll();
-      });
-
-    }, 100);
-
-
-    $('body').on('reset-image-roll', function () {
-      // Reset image roll
-      self.currentImageRollIndex = 0;
-      self.setImageRollTranslate();
-
-      // Handle visibility of buttons
-      self.fadeToToggle(self.$imageRollArrowLeft, (self.currentImageRollIndex === 0));
-      self.fadeToToggle(self.$imageRollArrowRight, (self.currentImageRollIndex + self.getImageAmounts() >= self.rollElements));
+      // Unset height of inner container
+      $('.products-image-roll-inner').css('height', '');
+      self.resizeProductRoll();
     });
 
-    $('body').on('changed-slide', function () {
-      self.removeFooterColor();
+    self.$mixItUp.on('mixLoad', function () {
+      self.setMinHeightInnerRoll();
     });
 
-    $('.products').on('touchstart', function () {
-      console.log("started touching");
-    });
-  };
-
-  ProductsPage.prototype.orientationResize = function () {
-    var self = this;
-    var ratio = $(window).width() / $(window).height();
-    var $productsDisplay = $('.products-display');
-    var $body = $('body');
-
-    // Landscape
-    if (ratio > 1) {
-      $body.removeClass('portrait');
-      self.resizeWrapper($productsDisplay);
-      self.isPortrait = false;
-    } else { // Portrait
-      self.isPortrait = true;
-      $body.addClass('portrait');
-      $body.trigger('reset-image-roll');
-      self.portraitResize($productsDisplay);
-    }
-
-    self.resizeProductRoll();
-  };
-
-  ProductsPage.prototype.portraitResize = function ($productsDisplay) {
-    var $productsDisplay = $productsDisplay || $('.products-display');
-
-    $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
-    this.imageAmounts = 3;
-  };
-
-  ProductsPage.prototype.resizeWrapper = function ($productsDisplay) {
-    var self = this;
-    var windowWidth = $(window).width();
-
-    var $productsDisplay = $productsDisplay || $('.products-display');
-
-    if (windowWidth <= 600) {
-      $productsDisplay.removeClass('three-images four-images five-images').addClass('two-images');
-      self.imageAmounts = 2;
-    } else if (windowWidth <= 900) {
-      $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
-      self.imageAmounts = 3;
-    } else if (windowWidth <= 1200) {
-      $productsDisplay.removeClass('two-images three-images five-images').addClass('four-images');
-      self.imageAmounts = 4;
-    } else {
-      $productsDisplay.removeClass('two-images three-images four-images').addClass('five-images');
-      self.imageAmounts = 5;
-    }
-  };
-
-  ProductsPage.prototype.getBeerClasses = function (beerData) {
-    var beerArray = [];
-
-    beerData.products.forEach(function (beerCategory) {
-      beerCategory['beer-products'].forEach(function (beer) {
-        var beerClass = beer['beer-name'];
-        beerArray.push(beerClass);
-      })
+    self.$mixItUp.on('mixStart', function () {
+      self.setMinHeightInnerRoll();
     });
 
-    return beerArray;
-  };
-
-  ProductsPage.prototype.resizeProductRoll = function () {
-    var $productsDisplay = $('.products-display');
-    var $productsList = $('.products-list');
-    var $images = $productsDisplay.find('.mix');
-    var decrementPercentage = 0.5;
-
-    // Reset products display
-    $productsDisplay.removeClass('full-height');
-
-    // Reset image height
-    $images.css('width', '');
-
-    // Reduce image size if products display is too big.
-    console.log("is portrait ?", this.isPortrait);
-    console.log("prod displ outer height", $productsDisplay.outerHeight());
-    console.log("prod list h", $productsList.height());
-
-    if (this.isPortrait && ($productsDisplay.outerHeight() > $productsList.height())) {
-      // Disable skewered centering since product list is taking up full height
-      $productsDisplay.addClass('full-height');
+  }, 100);
 
 
-      var reduceImageSize = function ($images, currWidth) {
-        console.log("reduce image size ?");
-        var newWidth = currWidth - decrementPercentage;
-        console.log("new width", newWidth);
-        $images.css('width', newWidth + '%');
-      };
-
-      var imagesTooBig = true;
-      var test = 0;
-      while(imagesTooBig && test < 100) {
-        $productsDisplay.addClass('disable-transitions');
-        var currWidth = $images.width() / $productsList.width() * 100;
-        test += 1;
-        reduceImageSize($images, currWidth);
-        if ($productsDisplay.outerHeight() < $productsList.height()) {
-          imagesTooBig = false;
-        }
-      }
-      $productsDisplay.removeClass('disable-transitions');
-    }
-
-    this.setMinHeightInnerRoll()
-  };
-
-  ProductsPage.prototype.loadClones = function () {
-    var self = this;
-
-    // Clone pages and attach them to the left side
-    var $productPages = $('.products-pages');
-    var clonesLoaded = 0;
-    var totalClones = $productPages.length;
-    $productPages.each(function () {
-      var left = ((self.totalProductPages + 1 - (parseInt($(this).css('left'))) / $productPages.width())) * -100;
-      var $clone = $(this).clone()
-        .css('left', left + '%')
-        .addClass('clone')
-        .appendTo(self.$productsList);
-
-      self.initGoHomeButtons($clone.find('.back-to-product'));
-
-      $clone.ready(function () {
-        clonesLoaded += 1;
-
-        if (clonesLoaded >= totalClones) {
-          self.clonesLoaded = true;
-        }
-      });
-    });
-  };
-
-  ProductsPage.prototype.initProductsButtons = function () {
-    this.initGoHomeButtons($('.back-to-product'));
-  };
-
-  ProductsPage.prototype.initImageRollButtons = function () {
-    var self = this;
-    var $mixElements = this.$productsList.find('.mix');
-    var scrollAmount = $mixElements.get(0).offsetWidth;
-    var visibleElements = this.getImageAmounts();
-    var rollElements = 0;
-    $mixElements.each(function () {
-      if ($(this).is(':visible')) {
-        rollElements += 1;
-      }
-    });
-
-    this.$imageRollArrowLeft.unbind('click')
-      .click(function () {
-
-        // Already at min index
-        if (self.currentImageRollIndex === 0) {
-          return;
-        }
-
-        // Increase current image roll index
-        self.currentImageRollIndex -= 1;
-
-        if (self.currentImageRollIndex <= 0) {
-          self.fadeToHidden(self.$imageRollArrowLeft)
-        }
-        self.fadeToShown(self.$imageRollArrowRight);
-
-        // Negative translation
-        scrollAmount = $mixElements.get(0).offsetWidth;
-
-        console.log("scroll amount ?", scrollAmount);
-        self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
-      });
-
-    this.$imageRollArrowRight.unbind('click')
-      .click(function () {
-
-        // All images already shown
-        if (self.currentImageRollIndex + 1 + visibleElements > rollElements) {
-          return;
-        }
-
-        // Decrease current image roll index
-        self.currentImageRollIndex += 1;
-
-        if (self.currentImageRollIndex + visibleElements >= rollElements) {
-          self.fadeToHidden(self.$imageRollArrowRight);
-        }
-        self.fadeToShown(self.$imageRollArrowLeft);
-
-        // Negative translation
-        scrollAmount = $mixElements.get(0).offsetWidth;
-        console.log("scroll amount ?", scrollAmount);
-
-        self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
-      });
-
+  $('body').on('reset-image-roll', function () {
     // Reset image roll
     self.currentImageRollIndex = 0;
     self.setImageRollTranslate();
 
     // Handle visibility of buttons
-    self.fadeToToggle(this.$imageRollArrowLeft, (this.currentImageRollIndex === 0));
-    self.fadeToToggle(this.$imageRollArrowRight, (this.currentImageRollIndex + visibleElements >= rollElements));
-    self.rollElements = rollElements;
-  };
+    self.fadeToToggle(self.$imageRollArrowLeft, (self.currentImageRollIndex === 0));
+    self.fadeToToggle(self.$imageRollArrowRight, (self.currentImageRollIndex + self.getImageAmounts() >= self.rollElements));
+  });
 
-  ProductsPage.prototype.setImageRollTranslate = function (value) {
-    var self = this;
-    value = value ? value : 0;
-    console.log("translating ", value);
-    if (!self.isPortrait) {
-      this.$innerImageRoll.css({
-        '-webkit-transform': 'translateX(' + value + 'px)',
-        transform: 'translateX(' + value + 'px)'
-      })
-    }
-  };
+  $('body').on('changed-slide', function () {
+    self.removeFooterColor();
+  });
 
-  ProductsPage.prototype.getImageAmounts = function () {
-    return this.imageAmounts;
-  };
+  $('.products').on('touchstart', function () {
+    console.log("started touching");
+  });
+};
 
-  ProductsPage.prototype.fadeToToggle = function ($element, boolean) {
-    if (boolean) {
-      this.fadeToHidden($element);
-    } else {
-      this.fadeToShown($element);
-    }
-  };
+ProductsPage.prototype.orientationResize = function () {
+  var self = this;
+  var ratio = $(window).width() / $(window).height();
+  var $productsDisplay = $('.products-display');
+  var $body = $('body');
 
-  ProductsPage.prototype.fadeToHidden = function ($element) {
-    $element.addClass('hiding').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (f) {
-      $element.addClass('hidden');
+  // Landscape
+  if (ratio > 1) {
+    $body.removeClass('portrait');
+    self.resizeWrapper($productsDisplay);
+    self.isPortrait = false;
+  } else { // Portrait
+    self.isPortrait = true;
+    $body.addClass('portrait');
+    $body.trigger('reset-image-roll');
+    self.portraitResize($productsDisplay);
+  }
 
-      // Make sure event is only triggered once.
-      $element.off(f);
+  self.resizeProductRoll();
+};
+
+ProductsPage.prototype.portraitResize = function ($productsDisplay) {
+  var $productsDisplay = $productsDisplay || $('.products-display');
+
+  $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
+  this.imageAmounts = 3;
+};
+
+ProductsPage.prototype.resizeWrapper = function ($productsDisplay) {
+  var self = this;
+  var windowWidth = $(window).width();
+
+  var $productsDisplay = $productsDisplay || $('.products-display');
+
+  if (windowWidth <= 600) {
+    $productsDisplay.removeClass('three-images four-images five-images').addClass('two-images');
+    self.imageAmounts = 2;
+  } else if (windowWidth <= 900) {
+    $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
+    self.imageAmounts = 3;
+  } else if (windowWidth <= 1200) {
+    $productsDisplay.removeClass('two-images three-images five-images').addClass('four-images');
+    self.imageAmounts = 4;
+  } else {
+    $productsDisplay.removeClass('two-images three-images four-images').addClass('five-images');
+    self.imageAmounts = 5;
+  }
+};
+
+ProductsPage.prototype.getBeerClasses = function (beerData) {
+  var beerArray = [];
+
+  beerData.products.forEach(function (beerCategory) {
+    beerCategory['beer-products'].forEach(function (beer) {
+      var beerClass = beer['beer-name'];
+      beerArray.push(beerClass);
     })
-  };
+  });
 
-  ProductsPage.prototype.fadeToShown = function ($element) {
-    $element.removeClass('hidden').removeClass('hiding');
-  };
+  return beerArray;
+};
 
-  ProductsPage.prototype.initGoHomeButtons = function ($buttons) {
-    var self = this;
-    $buttons.click(function () {
-      self.goHome();
+ProductsPage.prototype.resizeProductRoll = function () {
+  var $productsDisplay = $('.products-display');
+  var $productsList = $('.products-list');
+  var $images = $productsDisplay.find('.mix');
+  var decrementPercentage = 0.5;
+
+  // Reset products display
+  $productsDisplay.removeClass('full-height');
+
+  // Reset image height
+  $images.css('width', '');
+
+  // Reduce image size if products display is too big.
+  console.log("is portrait ?", this.isPortrait);
+  console.log("prod displ outer height", $productsDisplay.outerHeight());
+  console.log("prod list h", $productsList.height());
+
+  if (this.isPortrait && ($productsDisplay.outerHeight() > $productsList.height())) {
+    // Disable skewered centering since product list is taking up full height
+    $productsDisplay.addClass('full-height');
+
+
+    var reduceImageSize = function ($images, currWidth) {
+      console.log("reduce image size ?");
+      var newWidth = currWidth - decrementPercentage;
+      console.log("new width", newWidth);
+      $images.css('width', newWidth + '%');
+    };
+
+    var imagesTooBig = true;
+    var test = 0;
+    while(imagesTooBig && test < 100) {
+      $productsDisplay.addClass('disable-transitions');
+      var currWidth = $images.width() / $productsList.width() * 100;
+      test += 1;
+      reduceImageSize($images, currWidth);
+      if ($productsDisplay.outerHeight() < $productsList.height()) {
+        imagesTooBig = false;
+      }
+    }
+    $productsDisplay.removeClass('disable-transitions');
+  }
+
+  this.setMinHeightInnerRoll()
+};
+
+ProductsPage.prototype.loadClones = function () {
+  var self = this;
+
+  // Clone pages and attach them to the left side
+  var $productPages = $('.products-pages');
+  var clonesLoaded = 0;
+  var totalClones = $productPages.length;
+  $productPages.each(function () {
+    var left = ((self.totalProductPages + 1 - (parseInt($(this).css('left'))) / $productPages.width())) * -100;
+    var $clone = $(this).clone()
+      .css('left', left + '%')
+      .addClass('clone')
+      .appendTo(self.$productsList);
+
+    self.initGoHomeButtons($clone.find('.back-to-product'));
+
+    $clone.ready(function () {
+      clonesLoaded += 1;
+
+      if (clonesLoaded >= totalClones) {
+        self.clonesLoaded = true;
+      }
     });
-  };
+  });
+};
 
-  ProductsPage.prototype.initFilterButtons = function () {
-    var self = this;
+ProductsPage.prototype.initProductsButtons = function () {
+  this.initGoHomeButtons($('.back-to-product'));
+};
 
-    $('.filter-series button')
-      .on('touchstart', function () {
-        $(this).addClass('no-hover');
-      }).click(function () {
+ProductsPage.prototype.initImageRollButtons = function () {
+  var self = this;
+  var $mixElements = this.$productsList.find('.mix');
+  var scrollAmount = $mixElements.get(0).offsetWidth;
+  var visibleElements = this.getImageAmounts();
+  var rollElements = 0;
+  $mixElements.each(function () {
+    if ($(this).is(':visible')) {
+      rollElements += 1;
+    }
+  });
 
-      // Remove all active classes for buttons
-      $('.filter-series button').each(function () {
-        $(this).removeClass('active');
-      });
+  this.$imageRollArrowLeft.unbind('click')
+    .click(function () {
 
-      // Add active state to this button
-      $(this).addClass('active');
-      $(this).removeClass('no-hover');
+      // Already at min index
+      if (self.currentImageRollIndex === 0) {
+        return;
+      }
+
+      // Increase current image roll index
+      self.currentImageRollIndex -= 1;
+
+      if (self.currentImageRollIndex <= 0) {
+        self.fadeToHidden(self.$imageRollArrowLeft)
+      }
+      self.fadeToShown(self.$imageRollArrowRight);
+
+      // Negative translation
+      scrollAmount = $mixElements.get(0).offsetWidth;
+
+      console.log("scroll amount ?", scrollAmount);
+      self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
     });
-  };
 
-  ProductsPage.prototype.initImageButtons = function () {
-    var self = this;
-    $('.products-display .mix').each(function () {
-      $(this).click(function () {
-        var beerIndex = $(this).attr('data-my-order');
-        self.$productsList.addClass('has-moved');
-        if (beerIndex === 0) {
-          self.$productsList.removeClass('has-moved');
-        }
+  this.$imageRollArrowRight.unbind('click')
+    .click(function () {
 
-        self.goToBeerPage(beerIndex);
-      });
+      // All images already shown
+      if (self.currentImageRollIndex + 1 + visibleElements > rollElements) {
+        return;
+      }
+
+      // Decrease current image roll index
+      self.currentImageRollIndex += 1;
+
+      if (self.currentImageRollIndex + visibleElements >= rollElements) {
+        self.fadeToHidden(self.$imageRollArrowRight);
+      }
+      self.fadeToShown(self.$imageRollArrowLeft);
+
+      // Negative translation
+      scrollAmount = $mixElements.get(0).offsetWidth;
+      console.log("scroll amount ?", scrollAmount);
+
+      self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
     });
-  };
 
-  ProductsPage.prototype.goHome = function () {
-    this.goToBeerPage(0);
-  };
+  // Reset image roll
+  self.currentImageRollIndex = 0;
+  self.setImageRollTranslate();
 
-  ProductsPage.prototype.goToBeerPage = function (index) {
-    if (index === this.currentIndex) {
-      return;
-    }
+  // Handle visibility of buttons
+  self.fadeToToggle(this.$imageRollArrowLeft, (this.currentImageRollIndex === 0));
+  self.fadeToToggle(this.$imageRollArrowRight, (this.currentImageRollIndex + visibleElements >= rollElements));
+  self.rollElements = rollElements;
+};
 
-    // Get beer class
-    if (index !== 0) {
-      var beerClass = $('.products-display .mix').eq(index - 1).attr('class').split(' ').pop().split('-').pop();
-      $('body').addClass(beerClass);
-    } else {
-      this.removeFooterColor();
-    }
+ProductsPage.prototype.setImageRollTranslate = function (value) {
+  var self = this;
+  value = value ? value : 0;
+  console.log("translating ", value);
+  if (!self.isPortrait) {
+    this.$innerImageRoll.css({
+      '-webkit-transform': 'translateX(' + value + 'px)',
+      transform: 'translateX(' + value + 'px)'
+    })
+  }
+};
 
+ProductsPage.prototype.getImageAmounts = function () {
+  return this.imageAmounts;
+};
 
-    var self = this;
-    var percentageTranslate = index * -100;
+ProductsPage.prototype.fadeToToggle = function ($element, boolean) {
+  if (boolean) {
+    this.fadeToHidden($element);
+  } else {
+    this.fadeToShown($element);
+  }
+};
 
-    if (self.clonesLoaded && (index > (this.totalProductPages / 2))) {
+ProductsPage.prototype.fadeToHidden = function ($element) {
+  $element.addClass('hiding').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (f) {
+    $element.addClass('hidden');
 
-      // Move backwards
-      var reverseIndex = (index - this.totalProductPages) - 1;
-      percentageTranslate = reverseIndex * -100;
+    // Make sure event is only triggered once.
+    $element.off(f);
+  })
+};
 
-      self.translateProductList(percentageTranslate);
-      this.currentIndex = index;
-    } else {
-      self.translateProductList(percentageTranslate);
-      this.currentIndex = index;
-    }
-  };
+ProductsPage.prototype.fadeToShown = function ($element) {
+  $element.removeClass('hidden').removeClass('hiding');
+};
 
-  ProductsPage.prototype.removeFooterColor = function () {
-    var $body = $('body');
-    this.beerClasses.forEach(function (beerClass) {
-      $body.removeClass(beerClass);
+ProductsPage.prototype.initGoHomeButtons = function ($buttons) {
+  var self = this;
+  $buttons.click(function () {
+    self.goHome();
+  });
+};
+
+ProductsPage.prototype.initFilterButtons = function () {
+  var self = this;
+
+  $('.filter-series button')
+    .on('touchstart', function () {
+      $(this).addClass('no-hover');
+    }).click(function () {
+
+    // Remove all active classes for buttons
+    $('.filter-series button').each(function () {
+      $(this).removeClass('active');
     });
-  };
 
-  ProductsPage.prototype.transitionProductList = function (value) {
-    this.$productsList.css({
-      '-webkit-transition': value,
-      transition: value
+    // Add active state to this button
+    $(this).addClass('active');
+    $(this).removeClass('no-hover');
+  });
+};
+
+ProductsPage.prototype.initImageButtons = function () {
+  var self = this;
+  $('.products-display .mix').each(function () {
+    $(this).click(function () {
+      var beerIndex = $(this).attr('data-my-order');
+      self.$productsList.addClass('has-moved');
+      if (beerIndex === 0) {
+        self.$productsList.removeClass('has-moved');
+      }
+
+      self.goToBeerPage(beerIndex);
     });
-  };
+  });
+};
 
-  ProductsPage.prototype.translateProductList = function (percentageTranslate) {
-    this.$productsList.css({
-      '-webkit-transform': 'translateX(' + percentageTranslate + '%)',
-      transform: 'translateX(' + percentageTranslate + '%)'
-    });
-  };
+ProductsPage.prototype.goHome = function () {
+  this.goToBeerPage(0);
+};
 
-
-  return ProductsPage;
-
-})();
-
-},{}],9:[function(require,module,exports){
-var hogan = require("hogan.js");var n = new hogan.Template({code: function (c,p,i) { var t=this;t.b(i=i||"");if(t.s(t.f("beer-products",c,p,1),c,p,0,18,303,"{{ }}")){t.rs(c,p,function(c,p,t){t.b("  <div class=\"mix products-");t.b(t.v(t.f("category-name",c,p,0)));t.b(" img-product-");t.b(t.v(t.f("beer-name",c,p,0)));t.b("\" data-my-order=\"");t.b(t.v(t.f("order",c,p,0)));t.b("\">");t.b("\n" + i);t.b("    <div class=\"loader-container\">");t.b("\n" + i);t.b("      <div class=\"loader\"></div>");t.b("\n" + i);t.b("    </div>");t.b("\n" + i);t.b("    <img src=\"images/etiketter/cropped/Graff_");t.b(t.v(t.f("file-name",c,p,0)));t.b(".png\">");t.b("\n" + i);t.b("    <div class=\"overlay\"></div>");t.b("\n" + i);t.b("  </div>");t.b("\n" + i);});c.pop();}return t.fl(); },partials: {}, subs: {  }});module.exports = function(data, partials) {return n.render(data, partials)}
-},{"hogan.js":13}],10:[function(require,module,exports){
-var hogan = require("hogan.js");var n = new hogan.Template({code: function (c,p,i) { var t=this;t.b(i=i||"");if(t.s(t.f("beer-products",c,p,1),c,p,0,18,1192,"{{ }}")){t.rs(c,p,function(c,p,t){t.b("  <div class=\"products-pages product-");t.b(t.v(t.f("beer-name",c,p,0)));t.b("\">");t.b("\n" + i);t.b("    <div class=\"products-pages-inner\">");t.b("\n" + i);t.b("      <div class=\"product-info\">");t.b("\n" + i);t.b("        <div class=\"product-header\">");t.b("\n" + i);t.b("          <button class=\"back-to-product\"></button>");t.b("\n" + i);t.b("          <h2 class=\"product-title\">");t.b(t.v(t.f("product-title",c,p,0)));t.b("</h2>");t.b("\n" + i);t.b("        </div>");t.b("\n" + i);t.b("        <div class=\"info-field\">");t.b("\n" + i);t.b("          <div class=\"poetic-text\">");t.b("\n" + i);t.b("            ");t.b(t.t(t.f("poetic-text",c,p,0)));t.b("\n" + i);t.b("          </div>");t.b("\n" + i);t.b("          <div class=\"info-list\">");t.b("\n" + i);t.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");t.b(t.v(t.f("alcohol-percentage",c,p,0)));t.b(" %</span></div>");t.b("\n" + i);t.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");t.b(t.v(t.f("type",c,p,0)));t.b("</span></div>");t.b("\n" + i);t.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");t.b(t.v(t.f("IBU",c,p,0)));t.b(" / ");t.b(t.v(t.f("OG",c,p,0)));t.b("°P</span></div>");t.b("\n" + i);t.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");t.b(t.v(t.f("serving-temperature",c,p,0)));t.b("°C</span></div>");t.b("\n" + i);t.b("          </div>");t.b("\n" + i);t.b("        </div>");t.b("\n" + i);t.b("      </div>");t.b("\n" + i);t.b("      <div class=\"product-images\">");t.b("\n" + i);t.b("        <img src=\"images/etiketter/cropped/Graff_");t.b(t.v(t.f("file-name",c,p,0)));t.b(".png\">");t.b("\n" + i);t.b("      </div>");t.b("\n" + i);t.b("    </div>");t.b("\n" + i);t.b("  </div>");t.b("\n" + i);});c.pop();}return t.fl(); },partials: {}, subs: {  }});module.exports = function(data, partials) {return n.render(data, partials)}
-},{"hogan.js":13}],11:[function(require,module,exports){
-var hogan = require("hogan.js");var n = new hogan.Template({code: function (c,p,i) { var t=this;t.b(i=i||"");t.b("<div class=\"products-list\">");t.b("\n" + i);t.b("  <div class=\"products-display\">");t.b("\n" + i);t.b("    <div class=\"controls-filter\">");t.b("\n" + i);t.b("      <div class=\"filter-series\">");t.b("\n" + i);t.b("        <button class=\"filter button-all selected\" data-filter=\"all\">ALL</button>");t.b("\n" + i);if(t.s(t.f("products",c,p,1),c,p,0,232,373,"{{ }}")){t.rs(c,p,function(c,p,t){t.b("          <button class=\"filter button-");t.b(t.v(t.f("category-name",c,p,0)));t.b("\" data-filter=\".products-");t.b(t.v(t.f("category-name",c,p,0)));t.b("\">");t.b(t.v(t.f("category-full-name",c,p,0)));t.b("</button>");t.b("\n" + i);});c.pop();}t.b("      </div>");t.b("\n" + i);t.b("    </div>");t.b("\n" + i);t.b("    <div class=\"products-display-inner\">");t.b("\n" + i);t.b("      <div class=\"products-image-roll\">");t.b("\n" + i);t.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");t.b("\n" + i);t.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");t.b("\n" + i);t.b("        <div class=\"products-image-roll-inner\">");t.b("\n" + i);if(t.s(t.f("products",c,p,1),c,p,0,710,750,"{{ }}")){t.rs(c,p,function(c,p,t){t.b(t.rp("<image-roll0",c,p,"            "));});c.pop();}t.b("        </div>");t.b("\n" + i);t.b("      </div>");t.b("\n" + i);t.b("    </div>");t.b("\n" + i);t.b("  </div>");t.b("\n" + i);if(t.s(t.f("products",c,p,1),c,p,0,827,854,"{{ }}")){t.rs(c,p,function(c,p,t){t.b(t.rp("<product-pages1",c,p,"    "));});c.pop();}t.b("</div>");t.b("\n");return t.fl(); },partials: {"<image-roll0":{name:"image-roll", partials: {}, subs: {  }},"<product-pages1":{name:"product-pages", partials: {}, subs: {  }}}, subs: {  }});module.exports = function(data, partials) {return n.render(data, partials)}
-},{"hogan.js":13}],12:[function(require,module,exports){
-/*
- *  Copyright 2011 Twitter, Inc.
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-(function (Hogan) {
-  // Setup regex  assignments
-  // remove whitespace according to Mustache spec
-  var rIsWhitespace = /\S/,
-      rQuot = /\"/g,
-      rNewline =  /\n/g,
-      rCr = /\r/g,
-      rSlash = /\\/g,
-      rLineSep = /\u2028/,
-      rParagraphSep = /\u2029/;
-
-  Hogan.tags = {
-    '#': 1, '^': 2, '<': 3, '$': 4,
-    '/': 5, '!': 6, '>': 7, '=': 8, '_v': 9,
-    '{': 10, '&': 11, '_t': 12
-  };
-
-  Hogan.scan = function scan(text, delimiters) {
-    var len = text.length,
-        IN_TEXT = 0,
-        IN_TAG_TYPE = 1,
-        IN_TAG = 2,
-        state = IN_TEXT,
-        tagType = null,
-        tag = null,
-        buf = '',
-        tokens = [],
-        seenTag = false,
-        i = 0,
-        lineStart = 0,
-        otag = '{{',
-        ctag = '}}';
-
-    function addBuf() {
-      if (buf.length > 0) {
-        tokens.push({tag: '_t', text: new String(buf)});
-        buf = '';
-      }
-    }
-
-    function lineIsWhitespace() {
-      var isAllWhitespace = true;
-      for (var j = lineStart; j < tokens.length; j++) {
-        isAllWhitespace =
-          (Hogan.tags[tokens[j].tag] < Hogan.tags['_v']) ||
-          (tokens[j].tag == '_t' && tokens[j].text.match(rIsWhitespace) === null);
-        if (!isAllWhitespace) {
-          return false;
-        }
-      }
-
-      return isAllWhitespace;
-    }
-
-    function filterLine(haveSeenTag, noNewLine) {
-      addBuf();
-
-      if (haveSeenTag && lineIsWhitespace()) {
-        for (var j = lineStart, next; j < tokens.length; j++) {
-          if (tokens[j].text) {
-            if ((next = tokens[j+1]) && next.tag == '>') {
-              // set indent to token value
-              next.indent = tokens[j].text.toString()
-            }
-            tokens.splice(j, 1);
-          }
-        }
-      } else if (!noNewLine) {
-        tokens.push({tag:'\n'});
-      }
-
-      seenTag = false;
-      lineStart = tokens.length;
-    }
-
-    function changeDelimiters(text, index) {
-      var close = '=' + ctag,
-          closeIndex = text.indexOf(close, index),
-          delimiters = trim(
-            text.substring(text.indexOf('=', index) + 1, closeIndex)
-          ).split(' ');
-
-      otag = delimiters[0];
-      ctag = delimiters[delimiters.length - 1];
-
-      return closeIndex + close.length - 1;
-    }
-
-    if (delimiters) {
-      delimiters = delimiters.split(' ');
-      otag = delimiters[0];
-      ctag = delimiters[1];
-    }
-
-    for (i = 0; i < len; i++) {
-      if (state == IN_TEXT) {
-        if (tagChange(otag, text, i)) {
-          --i;
-          addBuf();
-          state = IN_TAG_TYPE;
-        } else {
-          if (text.charAt(i) == '\n') {
-            filterLine(seenTag);
-          } else {
-            buf += text.charAt(i);
-          }
-        }
-      } else if (state == IN_TAG_TYPE) {
-        i += otag.length - 1;
-        tag = Hogan.tags[text.charAt(i + 1)];
-        tagType = tag ? text.charAt(i + 1) : '_v';
-        if (tagType == '=') {
-          i = changeDelimiters(text, i);
-          state = IN_TEXT;
-        } else {
-          if (tag) {
-            i++;
-          }
-          state = IN_TAG;
-        }
-        seenTag = i;
-      } else {
-        if (tagChange(ctag, text, i)) {
-          tokens.push({tag: tagType, n: trim(buf), otag: otag, ctag: ctag,
-                       i: (tagType == '/') ? seenTag - otag.length : i + ctag.length});
-          buf = '';
-          i += ctag.length - 1;
-          state = IN_TEXT;
-          if (tagType == '{') {
-            if (ctag == '}}') {
-              i++;
-            } else {
-              cleanTripleStache(tokens[tokens.length - 1]);
-            }
-          }
-        } else {
-          buf += text.charAt(i);
-        }
-      }
-    }
-
-    filterLine(seenTag, true);
-
-    return tokens;
+ProductsPage.prototype.goToBeerPage = function (index) {
+  if (index === this.currentIndex) {
+    return;
   }
 
-  function cleanTripleStache(token) {
-    if (token.n.substr(token.n.length - 1) === '}') {
-      token.n = token.n.substring(0, token.n.length - 1);
-    }
+  // Get beer class
+  if (index !== 0) {
+    var beerClass = $('.products-display .mix').eq(index - 1).attr('class').split(' ').pop().split('-').pop();
+    $('body').addClass(beerClass);
+  } else {
+    this.removeFooterColor();
   }
 
-  function trim(s) {
-    if (s.trim) {
-      return s.trim();
-    }
 
-    return s.replace(/^\s*|\s*$/g, '');
+  var self = this;
+  var percentageTranslate = index * -100;
+
+  if (self.clonesLoaded && (index > (this.totalProductPages / 2))) {
+
+    // Move backwards
+    var reverseIndex = (index - this.totalProductPages) - 1;
+    percentageTranslate = reverseIndex * -100;
+
+    self.translateProductList(percentageTranslate);
+    this.currentIndex = index;
+  } else {
+    self.translateProductList(percentageTranslate);
+    this.currentIndex = index;
   }
+};
 
-  function tagChange(tag, text, index) {
-    if (text.charAt(index) != tag.charAt(0)) {
-      return false;
-    }
+ProductsPage.prototype.removeFooterColor = function () {
+  var $body = $('body');
+  this.beerClasses.forEach(function (beerClass) {
+    $body.removeClass(beerClass);
+  });
+};
 
-    for (var i = 1, l = tag.length; i < l; i++) {
-      if (text.charAt(index + i) != tag.charAt(i)) {
-        return false;
-      }
-    }
+ProductsPage.prototype.transitionProductList = function (value) {
+  this.$productsList.css({
+    '-webkit-transition': value,
+    transition: value
+  });
+};
 
-    return true;
-  }
+ProductsPage.prototype.translateProductList = function (percentageTranslate) {
+  this.$productsList.css({
+    '-webkit-transform': 'translateX(' + percentageTranslate + '%)',
+    transform: 'translateX(' + percentageTranslate + '%)'
+  });
+};
 
-  // the tags allowed inside super templates
-  var allowedInSuper = {'_t': true, '\n': true, '$': true, '/': true};
+module.exports = ProductsPage;
 
-  function buildTree(tokens, kind, stack, customTags) {
-    var instructions = [],
-        opener = null,
-        tail = null,
-        token = null;
-
-    tail = stack[stack.length - 1];
-
-    while (tokens.length > 0) {
-      token = tokens.shift();
-
-      if (tail && tail.tag == '<' && !(token.tag in allowedInSuper)) {
-        throw new Error('Illegal content in < super tag.');
-      }
-
-      if (Hogan.tags[token.tag] <= Hogan.tags['$'] || isOpener(token, customTags)) {
-        stack.push(token);
-        token.nodes = buildTree(tokens, token.tag, stack, customTags);
-      } else if (token.tag == '/') {
-        if (stack.length === 0) {
-          throw new Error('Closing tag without opener: /' + token.n);
-        }
-        opener = stack.pop();
-        if (token.n != opener.n && !isCloser(token.n, opener.n, customTags)) {
-          throw new Error('Nesting error: ' + opener.n + ' vs. ' + token.n);
-        }
-        opener.end = token.i;
-        return instructions;
-      } else if (token.tag == '\n') {
-        token.last = (tokens.length == 0) || (tokens[0].tag == '\n');
-      }
-
-      instructions.push(token);
-    }
-
-    if (stack.length > 0) {
-      throw new Error('missing closing tag: ' + stack.pop().n);
-    }
-
-    return instructions;
-  }
-
-  function isOpener(token, tags) {
-    for (var i = 0, l = tags.length; i < l; i++) {
-      if (tags[i].o == token.n) {
-        token.tag = '#';
-        return true;
-      }
-    }
-  }
-
-  function isCloser(close, open, tags) {
-    for (var i = 0, l = tags.length; i < l; i++) {
-      if (tags[i].c == close && tags[i].o == open) {
-        return true;
-      }
-    }
-  }
-
-  function stringifySubstitutions(obj) {
-    var items = [];
-    for (var key in obj) {
-      items.push('"' + esc(key) + '": function(c,p,t,i) {' + obj[key] + '}');
-    }
-    return "{ " + items.join(",") + " }";
-  }
-
-  function stringifyPartials(codeObj) {
-    var partials = [];
-    for (var key in codeObj.partials) {
-      partials.push('"' + esc(key) + '":{name:"' + esc(codeObj.partials[key].name) + '", ' + stringifyPartials(codeObj.partials[key]) + "}");
-    }
-    return "partials: {" + partials.join(",") + "}, subs: " + stringifySubstitutions(codeObj.subs);
-  }
-
-  Hogan.stringify = function(codeObj, text, options) {
-    return "{code: function (c,p,i) { " + Hogan.wrapMain(codeObj.code) + " }," + stringifyPartials(codeObj) +  "}";
-  }
-
-  var serialNo = 0;
-  Hogan.generate = function(tree, text, options) {
-    serialNo = 0;
-    var context = { code: '', subs: {}, partials: {} };
-    Hogan.walk(tree, context);
-
-    if (options.asString) {
-      return this.stringify(context, text, options);
-    }
-
-    return this.makeTemplate(context, text, options);
-  }
-
-  Hogan.wrapMain = function(code) {
-    return 'var t=this;t.b(i=i||"");' + code + 'return t.fl();';
-  }
-
-  Hogan.template = Hogan.Template;
-
-  Hogan.makeTemplate = function(codeObj, text, options) {
-    var template = this.makePartials(codeObj);
-    template.code = new Function('c', 'p', 'i', this.wrapMain(codeObj.code));
-    return new this.template(template, text, this, options);
-  }
-
-  Hogan.makePartials = function(codeObj) {
-    var key, template = {subs: {}, partials: codeObj.partials, name: codeObj.name};
-    for (key in template.partials) {
-      template.partials[key] = this.makePartials(template.partials[key]);
-    }
-    for (key in codeObj.subs) {
-      template.subs[key] = new Function('c', 'p', 't', 'i', codeObj.subs[key]);
-    }
-    return template;
-  }
-
-  function esc(s) {
-    return s.replace(rSlash, '\\\\')
-            .replace(rQuot, '\\\"')
-            .replace(rNewline, '\\n')
-            .replace(rCr, '\\r')
-            .replace(rLineSep, '\\u2028')
-            .replace(rParagraphSep, '\\u2029');
-  }
-
-  function chooseMethod(s) {
-    return (~s.indexOf('.')) ? 'd' : 'f';
-  }
-
-  function createPartial(node, context) {
-    var prefix = "<" + (context.prefix || "");
-    var sym = prefix + node.n + serialNo++;
-    context.partials[sym] = {name: node.n, partials: {}};
-    context.code += 't.b(t.rp("' +  esc(sym) + '",c,p,"' + (node.indent || '') + '"));';
-    return sym;
-  }
-
-  Hogan.codegen = {
-    '#': function(node, context) {
-      context.code += 'if(t.s(t.' + chooseMethod(node.n) + '("' + esc(node.n) + '",c,p,1),' +
-                      'c,p,0,' + node.i + ',' + node.end + ',"' + node.otag + " " + node.ctag + '")){' +
-                      't.rs(c,p,' + 'function(c,p,t){';
-      Hogan.walk(node.nodes, context);
-      context.code += '});c.pop();}';
-    },
-
-    '^': function(node, context) {
-      context.code += 'if(!t.s(t.' + chooseMethod(node.n) + '("' + esc(node.n) + '",c,p,1),c,p,1,0,0,"")){';
-      Hogan.walk(node.nodes, context);
-      context.code += '};';
-    },
-
-    '>': createPartial,
-    '<': function(node, context) {
-      var ctx = {partials: {}, code: '', subs: {}, inPartial: true};
-      Hogan.walk(node.nodes, ctx);
-      var template = context.partials[createPartial(node, context)];
-      template.subs = ctx.subs;
-      template.partials = ctx.partials;
-    },
-
-    '$': function(node, context) {
-      var ctx = {subs: {}, code: '', partials: context.partials, prefix: node.n};
-      Hogan.walk(node.nodes, ctx);
-      context.subs[node.n] = ctx.code;
-      if (!context.inPartial) {
-        context.code += 't.sub("' + esc(node.n) + '",c,p,i);';
-      }
-    },
-
-    '\n': function(node, context) {
-      context.code += write('"\\n"' + (node.last ? '' : ' + i'));
-    },
-
-    '_v': function(node, context) {
-      context.code += 't.b(t.v(t.' + chooseMethod(node.n) + '("' + esc(node.n) + '",c,p,0)));';
-    },
-
-    '_t': function(node, context) {
-      context.code += write('"' + esc(node.text) + '"');
-    },
-
-    '{': tripleStache,
-
-    '&': tripleStache
-  }
-
-  function tripleStache(node, context) {
-    context.code += 't.b(t.t(t.' + chooseMethod(node.n) + '("' + esc(node.n) + '",c,p,0)));';
-  }
-
-  function write(s) {
-    return 't.b(' + s + ');';
-  }
-
-  Hogan.walk = function(nodelist, context) {
-    var func;
-    for (var i = 0, l = nodelist.length; i < l; i++) {
-      func = Hogan.codegen[nodelist[i].tag];
-      func && func(nodelist[i], context);
-    }
-    return context;
-  }
-
-  Hogan.parse = function(tokens, text, options) {
-    options = options || {};
-    return buildTree(tokens, '', [], options.sectionTags || []);
-  }
-
-  Hogan.cache = {};
-
-  Hogan.cacheKey = function(text, options) {
-    return [text, !!options.asString, !!options.disableLambda, options.delimiters, !!options.modelGet].join('||');
-  }
-
-  Hogan.compile = function(text, options) {
-    options = options || {};
-    var key = Hogan.cacheKey(text, options);
-    var template = this.cache[key];
-
-    if (template) {
-      var partials = template.partials;
-      for (var name in partials) {
-        delete partials[name].instance;
-      }
-      return template;
-    }
-
-    template = this.generate(this.parse(this.scan(text, options.delimiters), text, options), text, options);
-    return this.cache[key] = template;
-  }
-})(typeof exports !== 'undefined' ? exports : Hogan);
-
-},{}],13:[function(require,module,exports){
-/*
- *  Copyright 2011 Twitter, Inc.
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-// This file is for use with Node.js. See dist/ for browser files.
-
-var Hogan = require('./compiler');
-Hogan.Template = require('./template').Template;
-Hogan.template = Hogan.Template;
-module.exports = Hogan;
-
-},{"./compiler":12,"./template":14}],14:[function(require,module,exports){
+},{"jquery":13}],9:[function(require,module,exports){
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,303,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"mix products-");_.b(_.v(_.f("category-name",c,p,0)));_.b(" img-product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\" data-my-order=\"");_.b(_.v(_.f("order",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"loader-container\">");_.b("\n" + i);_.b("      <div class=\"loader\"></div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("    <div class=\"overlay\"></div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+},{"hogan.js/lib/template":12}],10:[function(require,module,exports){
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1192,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner\">");_.b("\n" + i);_.b("      <div class=\"product-info\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+},{"hogan.js/lib/template":12}],11:[function(require,module,exports){
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<div class=\"products-list\">");_.b("\n" + i);_.b("  <div class=\"products-display\">");_.b("\n" + i);_.b("    <div class=\"controls-filter\">");_.b("\n" + i);_.b("      <div class=\"filter-series\">");_.b("\n" + i);_.b("        <button class=\"filter button-all selected\" data-filter=\"all\">ALL</button>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,232,373,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("          <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n");});c.pop();}_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <div class=\"products-display-inner\">");_.b("\n" + i);_.b("      <div class=\"products-image-roll\">");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-inner\">");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,710,750,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("image-roll",c,p,"            "));});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,827,854,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("product-pages",c,p,"    "));});c.pop();}_.b("</div>");_.b("\n");return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+},{"hogan.js/lib/template":12}],12:[function(require,module,exports){
 /*
  *  Copyright 2011 Twitter, Inc.
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -1398,16 +936,13 @@ module.exports = Hogan;
 
 var Hogan = {};
 
-(function (Hogan) {
-  Hogan.Template = function (codeObj, text, compiler, options) {
-    codeObj = codeObj || {};
-    this.r = codeObj.code || this.r;
+(function (Hogan, useArrayBuffer) {
+  Hogan.Template = function (renderFunc, text, compiler, options) {
+    this.r = renderFunc || this.r;
     this.c = compiler;
-    this.options = options || {};
+    this.options = options;
     this.text = text || '';
-    this.partials = codeObj.partials || {};
-    this.subs = codeObj.subs || {};
-    this.buf = '';
+    this.buf = (useArrayBuffer) ? [] : '';
   }
 
   Hogan.Template.prototype = {
@@ -1429,51 +964,16 @@ var Hogan = {};
       return this.r(context, partials, indent);
     },
 
-    // ensurePartial
-    ep: function(symbol, partials) {
-      var partial = this.partials[symbol];
+    // tries to find a partial in the curent scope and render it
+    rp: function(name, context, partials, indent) {
+      var partial = partials[name];
 
-      // check to see that if we've instantiated this partial before
-      var template = partials[partial.name];
-      if (partial.instance && partial.base == template) {
-        return partial.instance;
-      }
-
-      if (typeof template == 'string') {
-        if (!this.c) {
-          throw new Error("No compiler available.");
-        }
-        template = this.c.compile(template, this.options);
-      }
-
-      if (!template) {
-        return null;
-      }
-
-      // We use this to check whether the partials dictionary has changed
-      this.partials[symbol].base = template;
-
-      if (partial.subs) {
-        // Make sure we consider parent template now
-        if (!partials.stackText) partials.stackText = {};
-        for (key in partial.subs) {
-          if (!partials.stackText[key]) {
-            partials.stackText[key] = (this.activeSub !== undefined && partials.stackText[this.activeSub]) ? partials.stackText[this.activeSub] : this.text;
-          }
-        }
-        template = createSpecializedPartial(template, partial.subs, partial.partials,
-          this.stackSubs, this.stackPartials, partials.stackText);
-      }
-      this.partials[symbol].instance = template;
-
-      return template;
-    },
-
-    // tries to find a partial in the current scope and render it
-    rp: function(symbol, context, partials, indent) {
-      var partial = this.ep(symbol, partials);
       if (!partial) {
         return '';
+      }
+
+      if (this.c && typeof partial == 'string') {
+        partial = this.c.compile(partial, this.options);
       }
 
       return partial.ri(context, partials, indent);
@@ -1504,10 +1004,10 @@ var Hogan = {};
       }
 
       if (typeof val == 'function') {
-        val = this.ms(val, ctx, partials, inverted, start, end, tags);
+        val = this.ls(val, ctx, partials, inverted, start, end, tags);
       }
 
-      pass = !!val;
+      pass = (val === '') || !!val;
 
       if (!inverted && pass && ctx) {
         ctx.push((typeof val == 'object') ? val : ctx[ctx.length - 1]);
@@ -1518,23 +1018,20 @@ var Hogan = {};
 
     // find values with dotted names
     d: function(key, ctx, partials, returnFound) {
-      var found,
-          names = key.split('.'),
+      var names = key.split('.'),
           val = this.f(names[0], ctx, partials, returnFound),
-          doModelGet = this.options.modelGet,
           cx = null;
 
       if (key === '.' && isArray(ctx[ctx.length - 2])) {
-        val = ctx[ctx.length - 1];
-      } else {
-        for (var i = 1; i < names.length; i++) {
-          found = findInScope(names[i], val, doModelGet);
-          if (found !== undefined) {
-            cx = val;
-            val = found;
-          } else {
-            val = '';
-          }
+        return ctx[ctx.length - 1];
+      }
+
+      for (var i = 1; i < names.length; i++) {
+        if (val && typeof val == 'object' && names[i] in val) {
+          cx = val;
+          val = val[names[i]];
+        } else {
+          val = '';
         }
       }
 
@@ -1544,7 +1041,7 @@ var Hogan = {};
 
       if (!returnFound && typeof val == 'function') {
         ctx.push(cx);
-        val = this.mv(val, ctx, partials);
+        val = this.lv(val, ctx, partials);
         ctx.pop();
       }
 
@@ -1555,13 +1052,12 @@ var Hogan = {};
     f: function(key, ctx, partials, returnFound) {
       var val = false,
           v = null,
-          found = false,
-          doModelGet = this.options.modelGet;
+          found = false;
 
       for (var i = ctx.length - 1; i >= 0; i--) {
         v = ctx[i];
-        val = findInScope(key, v, doModelGet);
-        if (val !== undefined) {
+        if (v && typeof v == 'object' && key in v) {
+          val = v[key];
           found = true;
           break;
         }
@@ -1572,134 +1068,75 @@ var Hogan = {};
       }
 
       if (!returnFound && typeof val == 'function') {
-        val = this.mv(val, ctx, partials);
+        val = this.lv(val, ctx, partials);
       }
 
       return val;
     },
 
     // higher order templates
-    ls: function(func, cx, partials, text, tags) {
-      var oldTags = this.options.delimiters;
-
-      this.options.delimiters = tags;
-      this.b(this.ct(coerceToString(func.call(cx, text)), cx, partials));
-      this.options.delimiters = oldTags;
-
+    ho: function(val, cx, partials, text, tags) {
+      var compiler = this.c;
+      var options = this.options;
+      options.delimiters = tags;
+      var text = val.call(cx, text);
+      text = (text == null) ? String(text) : text.toString();
+      this.b(compiler.compile(text, options).render(cx, partials));
       return false;
     },
 
-    // compile text
-    ct: function(text, cx, partials) {
-      if (this.options.disableLambda) {
-        throw new Error('Lambda features disabled.');
-      }
-      return this.c.compile(text, this.options).render(cx, partials);
-    },
-
     // template result buffering
-    b: function(s) { this.buf += s; },
+    b: (useArrayBuffer) ? function(s) { this.buf.push(s); } :
+                          function(s) { this.buf += s; },
+    fl: (useArrayBuffer) ? function() { var r = this.buf.join(''); this.buf = []; return r; } :
+                           function() { var r = this.buf; this.buf = ''; return r; },
 
-    fl: function() { var r = this.buf; this.buf = ''; return r; },
+    // lambda replace section
+    ls: function(val, ctx, partials, inverted, start, end, tags) {
+      var cx = ctx[ctx.length - 1],
+          t = null;
 
-    // method replace section
-    ms: function(func, ctx, partials, inverted, start, end, tags) {
-      var textSource,
-          cx = ctx[ctx.length - 1],
-          result = func.call(cx);
+      if (!inverted && this.c && val.length > 0) {
+        return this.ho(val, cx, partials, this.text.substring(start, end), tags);
+      }
 
-      if (typeof result == 'function') {
+      t = val.call(cx);
+
+      if (typeof t == 'function') {
         if (inverted) {
           return true;
-        } else {
-          textSource = (this.activeSub && this.subsText && this.subsText[this.activeSub]) ? this.subsText[this.activeSub] : this.text;
-          return this.ls(result, cx, partials, textSource.substring(start, end), tags);
+        } else if (this.c) {
+          return this.ho(t, cx, partials, this.text.substring(start, end), tags);
         }
       }
 
-      return result;
+      return t;
     },
 
-    // method replace variable
-    mv: function(func, ctx, partials) {
+    // lambda replace variable
+    lv: function(val, ctx, partials) {
       var cx = ctx[ctx.length - 1];
-      var result = func.call(cx);
+      var result = val.call(cx);
 
       if (typeof result == 'function') {
-        return this.ct(coerceToString(result.call(cx)), cx, partials);
+        result = coerceToString(result.call(cx));
+        if (this.c && ~result.indexOf("{\u007B")) {
+          return this.c.compile(result, this.options).render(cx, partials);
+        }
       }
 
-      return result;
-    },
-
-    sub: function(name, context, partials, indent) {
-      var f = this.subs[name];
-      if (f) {
-        this.activeSub = name;
-        f(context, partials, this, indent);
-        this.activeSub = false;
-      }
+      return coerceToString(result);
     }
 
   };
 
-  //Find a key in an object
-  function findInScope(key, scope, doModelGet) {
-    var val;
-
-    if (scope && typeof scope == 'object') {
-
-      if (scope[key] !== undefined) {
-        val = scope[key];
-
-      // try lookup with get for backbone or similar model data
-      } else if (doModelGet && scope.get && typeof scope.get == 'function') {
-        val = scope.get(key);
-      }
-    }
-
-    return val;
-  }
-
-  function createSpecializedPartial(instance, subs, partials, stackSubs, stackPartials, stackText) {
-    function PartialTemplate() {};
-    PartialTemplate.prototype = instance;
-    function Substitutions() {};
-    Substitutions.prototype = instance.subs;
-    var key;
-    var partial = new PartialTemplate();
-    partial.subs = new Substitutions();
-    partial.subsText = {};  //hehe. substext.
-    partial.buf = '';
-
-    stackSubs = stackSubs || {};
-    partial.stackSubs = stackSubs;
-    partial.subsText = stackText;
-    for (key in subs) {
-      if (!stackSubs[key]) stackSubs[key] = subs[key];
-    }
-    for (key in stackSubs) {
-      partial.subs[key] = stackSubs[key];
-    }
-
-    stackPartials = stackPartials || {};
-    partial.stackPartials = stackPartials;
-    for (key in partials) {
-      if (!stackPartials[key]) stackPartials[key] = partials[key];
-    }
-    for (key in stackPartials) {
-      partial.partials[key] = stackPartials[key];
-    }
-
-    return partial;
-  }
-
   var rAmp = /&/g,
       rLt = /</g,
       rGt = />/g,
-      rApos = /\'/g,
+      rApos =/\'/g,
       rQuot = /\"/g,
-      hChars = /[&<>\"\']/;
+      hChars =/[&<>\"\']/;
+
 
   function coerceToString(val) {
     return String((val === null || val === undefined) ? '' : val);
@@ -1709,10 +1146,10 @@ var Hogan = {};
     str = coerceToString(str);
     return hChars.test(str) ?
       str
-        .replace(rAmp, '&amp;')
-        .replace(rLt, '&lt;')
-        .replace(rGt, '&gt;')
-        .replace(rApos, '&#39;')
+        .replace(rAmp,'&amp;')
+        .replace(rLt,'&lt;')
+        .replace(rGt,'&gt;')
+        .replace(rApos,'&#39;')
         .replace(rQuot, '&quot;') :
       str;
   }
@@ -1723,7 +1160,8 @@ var Hogan = {};
 
 })(typeof exports !== 'undefined' ? exports : Hogan);
 
-},{}],15:[function(require,module,exports){
+
+},{}],13:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -10932,635 +10370,6 @@ if ( typeof noGlobal === strundefined ) {
 
 
 return jQuery;
-
-}));
-
-},{}],16:[function(require,module,exports){
-/*!
- * mustache.js - Logic-less {{mustache}} templates with JavaScript
- * http://github.com/janl/mustache.js
- */
-
-/*global define: false Mustache: true*/
-
-(function defineMustache (global, factory) {
-  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
-    factory(exports); // CommonJS
-  } else if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory); // AMD
-  } else {
-    global.Mustache = {};
-    factory(Mustache); // script, wsh, asp
-  }
-}(this, function mustacheFactory (mustache) {
-
-  var objectToString = Object.prototype.toString;
-  var isArray = Array.isArray || function isArrayPolyfill (object) {
-    return objectToString.call(object) === '[object Array]';
-  };
-
-  function isFunction (object) {
-    return typeof object === 'function';
-  }
-
-  /**
-   * More correct typeof string handling array
-   * which normally returns typeof 'object'
-   */
-  function typeStr (obj) {
-    return isArray(obj) ? 'array' : typeof obj;
-  }
-
-  function escapeRegExp (string) {
-    return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
-  }
-
-  /**
-   * Null safe way of checking whether or not an object,
-   * including its prototype, has a given property
-   */
-  function hasProperty (obj, propName) {
-    return obj != null && typeof obj === 'object' && (propName in obj);
-  }
-
-  // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
-  // See https://github.com/janl/mustache.js/issues/189
-  var regExpTest = RegExp.prototype.test;
-  function testRegExp (re, string) {
-    return regExpTest.call(re, string);
-  }
-
-  var nonSpaceRe = /\S/;
-  function isWhitespace (string) {
-    return !testRegExp(nonSpaceRe, string);
-  }
-
-  var entityMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    '/': '&#x2F;'
-  };
-
-  function escapeHtml (string) {
-    return String(string).replace(/[&<>"'\/]/g, function fromEntityMap (s) {
-      return entityMap[s];
-    });
-  }
-
-  var whiteRe = /\s*/;
-  var spaceRe = /\s+/;
-  var equalsRe = /\s*=/;
-  var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
-
-  /**
-   * Breaks up the given `template` string into a tree of tokens. If the `tags`
-   * argument is given here it must be an array with two string values: the
-   * opening and closing tags used in the template (e.g. [ "<%", "%>" ]). Of
-   * course, the default is to use mustaches (i.e. mustache.tags).
-   *
-   * A token is an array with at least 4 elements. The first element is the
-   * mustache symbol that was used inside the tag, e.g. "#" or "&". If the tag
-   * did not contain a symbol (i.e. {{myValue}}) this element is "name". For
-   * all text that appears outside a symbol this element is "text".
-   *
-   * The second element of a token is its "value". For mustache tags this is
-   * whatever else was inside the tag besides the opening symbol. For text tokens
-   * this is the text itself.
-   *
-   * The third and fourth elements of the token are the start and end indices,
-   * respectively, of the token in the original template.
-   *
-   * Tokens that are the root node of a subtree contain two more elements: 1) an
-   * array of tokens in the subtree and 2) the index in the original template at
-   * which the closing tag for that section begins.
-   */
-  function parseTemplate (template, tags) {
-    if (!template)
-      return [];
-
-    var sections = [];     // Stack to hold section tokens
-    var tokens = [];       // Buffer to hold the tokens
-    var spaces = [];       // Indices of whitespace tokens on the current line
-    var hasTag = false;    // Is there a {{tag}} on the current line?
-    var nonSpace = false;  // Is there a non-space char on the current line?
-
-    // Strips all whitespace tokens array for the current line
-    // if there was a {{#tag}} on it and otherwise only space.
-    function stripSpace () {
-      if (hasTag && !nonSpace) {
-        while (spaces.length)
-          delete tokens[spaces.pop()];
-      } else {
-        spaces = [];
-      }
-
-      hasTag = false;
-      nonSpace = false;
-    }
-
-    var openingTagRe, closingTagRe, closingCurlyRe;
-    function compileTags (tagsToCompile) {
-      if (typeof tagsToCompile === 'string')
-        tagsToCompile = tagsToCompile.split(spaceRe, 2);
-
-      if (!isArray(tagsToCompile) || tagsToCompile.length !== 2)
-        throw new Error('Invalid tags: ' + tagsToCompile);
-
-      openingTagRe = new RegExp(escapeRegExp(tagsToCompile[0]) + '\\s*');
-      closingTagRe = new RegExp('\\s*' + escapeRegExp(tagsToCompile[1]));
-      closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tagsToCompile[1]));
-    }
-
-    compileTags(tags || mustache.tags);
-
-    var scanner = new Scanner(template);
-
-    var start, type, value, chr, token, openSection;
-    while (!scanner.eos()) {
-      start = scanner.pos;
-
-      // Match any text between tags.
-      value = scanner.scanUntil(openingTagRe);
-
-      if (value) {
-        for (var i = 0, valueLength = value.length; i < valueLength; ++i) {
-          chr = value.charAt(i);
-
-          if (isWhitespace(chr)) {
-            spaces.push(tokens.length);
-          } else {
-            nonSpace = true;
-          }
-
-          tokens.push([ 'text', chr, start, start + 1 ]);
-          start += 1;
-
-          // Check for whitespace on the current line.
-          if (chr === '\n')
-            stripSpace();
-        }
-      }
-
-      // Match the opening tag.
-      if (!scanner.scan(openingTagRe))
-        break;
-
-      hasTag = true;
-
-      // Get the tag type.
-      type = scanner.scan(tagRe) || 'name';
-      scanner.scan(whiteRe);
-
-      // Get the tag value.
-      if (type === '=') {
-        value = scanner.scanUntil(equalsRe);
-        scanner.scan(equalsRe);
-        scanner.scanUntil(closingTagRe);
-      } else if (type === '{') {
-        value = scanner.scanUntil(closingCurlyRe);
-        scanner.scan(curlyRe);
-        scanner.scanUntil(closingTagRe);
-        type = '&';
-      } else {
-        value = scanner.scanUntil(closingTagRe);
-      }
-
-      // Match the closing tag.
-      if (!scanner.scan(closingTagRe))
-        throw new Error('Unclosed tag at ' + scanner.pos);
-
-      token = [ type, value, start, scanner.pos ];
-      tokens.push(token);
-
-      if (type === '#' || type === '^') {
-        sections.push(token);
-      } else if (type === '/') {
-        // Check section nesting.
-        openSection = sections.pop();
-
-        if (!openSection)
-          throw new Error('Unopened section "' + value + '" at ' + start);
-
-        if (openSection[1] !== value)
-          throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
-      } else if (type === 'name' || type === '{' || type === '&') {
-        nonSpace = true;
-      } else if (type === '=') {
-        // Set the tags for the next time around.
-        compileTags(value);
-      }
-    }
-
-    // Make sure there are no open sections when we're done.
-    openSection = sections.pop();
-
-    if (openSection)
-      throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
-
-    return nestTokens(squashTokens(tokens));
-  }
-
-  /**
-   * Combines the values of consecutive text tokens in the given `tokens` array
-   * to a single token.
-   */
-  function squashTokens (tokens) {
-    var squashedTokens = [];
-
-    var token, lastToken;
-    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-      token = tokens[i];
-
-      if (token) {
-        if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
-          lastToken[1] += token[1];
-          lastToken[3] = token[3];
-        } else {
-          squashedTokens.push(token);
-          lastToken = token;
-        }
-      }
-    }
-
-    return squashedTokens;
-  }
-
-  /**
-   * Forms the given array of `tokens` into a nested tree structure where
-   * tokens that represent a section have two additional items: 1) an array of
-   * all tokens that appear in that section and 2) the index in the original
-   * template that represents the end of that section.
-   */
-  function nestTokens (tokens) {
-    var nestedTokens = [];
-    var collector = nestedTokens;
-    var sections = [];
-
-    var token, section;
-    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-      token = tokens[i];
-
-      switch (token[0]) {
-      case '#':
-      case '^':
-        collector.push(token);
-        sections.push(token);
-        collector = token[4] = [];
-        break;
-      case '/':
-        section = sections.pop();
-        section[5] = token[2];
-        collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
-        break;
-      default:
-        collector.push(token);
-      }
-    }
-
-    return nestedTokens;
-  }
-
-  /**
-   * A simple string scanner that is used by the template parser to find
-   * tokens in template strings.
-   */
-  function Scanner (string) {
-    this.string = string;
-    this.tail = string;
-    this.pos = 0;
-  }
-
-  /**
-   * Returns `true` if the tail is empty (end of string).
-   */
-  Scanner.prototype.eos = function eos () {
-    return this.tail === '';
-  };
-
-  /**
-   * Tries to match the given regular expression at the current position.
-   * Returns the matched text if it can match, the empty string otherwise.
-   */
-  Scanner.prototype.scan = function scan (re) {
-    var match = this.tail.match(re);
-
-    if (!match || match.index !== 0)
-      return '';
-
-    var string = match[0];
-
-    this.tail = this.tail.substring(string.length);
-    this.pos += string.length;
-
-    return string;
-  };
-
-  /**
-   * Skips all text until the given regular expression can be matched. Returns
-   * the skipped string, which is the entire tail if no match can be made.
-   */
-  Scanner.prototype.scanUntil = function scanUntil (re) {
-    var index = this.tail.search(re), match;
-
-    switch (index) {
-    case -1:
-      match = this.tail;
-      this.tail = '';
-      break;
-    case 0:
-      match = '';
-      break;
-    default:
-      match = this.tail.substring(0, index);
-      this.tail = this.tail.substring(index);
-    }
-
-    this.pos += match.length;
-
-    return match;
-  };
-
-  /**
-   * Represents a rendering context by wrapping a view object and
-   * maintaining a reference to the parent context.
-   */
-  function Context (view, parentContext) {
-    this.view = view;
-    this.cache = { '.': this.view };
-    this.parent = parentContext;
-  }
-
-  /**
-   * Creates a new context using the given view with this context
-   * as the parent.
-   */
-  Context.prototype.push = function push (view) {
-    return new Context(view, this);
-  };
-
-  /**
-   * Returns the value of the given name in this context, traversing
-   * up the context hierarchy if the value is absent in this context's view.
-   */
-  Context.prototype.lookup = function lookup (name) {
-    var cache = this.cache;
-
-    var value;
-    if (cache.hasOwnProperty(name)) {
-      value = cache[name];
-    } else {
-      var context = this, names, index, lookupHit = false;
-
-      while (context) {
-        if (name.indexOf('.') > 0) {
-          value = context.view;
-          names = name.split('.');
-          index = 0;
-
-          /**
-           * Using the dot notion path in `name`, we descend through the
-           * nested objects.
-           *
-           * To be certain that the lookup has been successful, we have to
-           * check if the last object in the path actually has the property
-           * we are looking for. We store the result in `lookupHit`.
-           *
-           * This is specially necessary for when the value has been set to
-           * `undefined` and we want to avoid looking up parent contexts.
-           **/
-          while (value != null && index < names.length) {
-            if (index === names.length - 1)
-              lookupHit = hasProperty(value, names[index]);
-
-            value = value[names[index++]];
-          }
-        } else {
-          value = context.view[name];
-          lookupHit = hasProperty(context.view, name);
-        }
-
-        if (lookupHit)
-          break;
-
-        context = context.parent;
-      }
-
-      cache[name] = value;
-    }
-
-    if (isFunction(value))
-      value = value.call(this.view);
-
-    return value;
-  };
-
-  /**
-   * A Writer knows how to take a stream of tokens and render them to a
-   * string, given a context. It also maintains a cache of templates to
-   * avoid the need to parse the same template twice.
-   */
-  function Writer () {
-    this.cache = {};
-  }
-
-  /**
-   * Clears all cached templates in this writer.
-   */
-  Writer.prototype.clearCache = function clearCache () {
-    this.cache = {};
-  };
-
-  /**
-   * Parses and caches the given `template` and returns the array of tokens
-   * that is generated from the parse.
-   */
-  Writer.prototype.parse = function parse (template, tags) {
-    var cache = this.cache;
-    var tokens = cache[template];
-
-    if (tokens == null)
-      tokens = cache[template] = parseTemplate(template, tags);
-
-    return tokens;
-  };
-
-  /**
-   * High-level method that is used to render the given `template` with
-   * the given `view`.
-   *
-   * The optional `partials` argument may be an object that contains the
-   * names and templates of partials that are used in the template. It may
-   * also be a function that is used to load partial templates on the fly
-   * that takes a single argument: the name of the partial.
-   */
-  Writer.prototype.render = function render (template, view, partials) {
-    var tokens = this.parse(template);
-    var context = (view instanceof Context) ? view : new Context(view);
-    return this.renderTokens(tokens, context, partials, template);
-  };
-
-  /**
-   * Low-level method that renders the given array of `tokens` using
-   * the given `context` and `partials`.
-   *
-   * Note: The `originalTemplate` is only ever used to extract the portion
-   * of the original template that was contained in a higher-order section.
-   * If the template doesn't use higher-order sections, this argument may
-   * be omitted.
-   */
-  Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate) {
-    var buffer = '';
-
-    var token, symbol, value;
-    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-      value = undefined;
-      token = tokens[i];
-      symbol = token[0];
-
-      if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
-      else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
-      else if (symbol === '>') value = this.renderPartial(token, context, partials, originalTemplate);
-      else if (symbol === '&') value = this.unescapedValue(token, context);
-      else if (symbol === 'name') value = this.escapedValue(token, context);
-      else if (symbol === 'text') value = this.rawValue(token);
-
-      if (value !== undefined)
-        buffer += value;
-    }
-
-    return buffer;
-  };
-
-  Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate) {
-    var self = this;
-    var buffer = '';
-    var value = context.lookup(token[1]);
-
-    // This function is used to render an arbitrary template
-    // in the current context by higher-order sections.
-    function subRender (template) {
-      return self.render(template, context, partials);
-    }
-
-    if (!value) return;
-
-    if (isArray(value)) {
-      for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
-        buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
-      }
-    } else if (typeof value === 'object' || typeof value === 'string' || typeof value === 'number') {
-      buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
-    } else if (isFunction(value)) {
-      if (typeof originalTemplate !== 'string')
-        throw new Error('Cannot use higher-order sections without the original template');
-
-      // Extract the portion of the original template that the section contains.
-      value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
-
-      if (value != null)
-        buffer += value;
-    } else {
-      buffer += this.renderTokens(token[4], context, partials, originalTemplate);
-    }
-    return buffer;
-  };
-
-  Writer.prototype.renderInverted = function renderInverted (token, context, partials, originalTemplate) {
-    var value = context.lookup(token[1]);
-
-    // Use JavaScript's definition of falsy. Include empty arrays.
-    // See https://github.com/janl/mustache.js/issues/186
-    if (!value || (isArray(value) && value.length === 0))
-      return this.renderTokens(token[4], context, partials, originalTemplate);
-  };
-
-  Writer.prototype.renderPartial = function renderPartial (token, context, partials) {
-    if (!partials) return;
-
-    var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
-    if (value != null)
-      return this.renderTokens(this.parse(value), context, partials, value);
-  };
-
-  Writer.prototype.unescapedValue = function unescapedValue (token, context) {
-    var value = context.lookup(token[1]);
-    if (value != null)
-      return value;
-  };
-
-  Writer.prototype.escapedValue = function escapedValue (token, context) {
-    var value = context.lookup(token[1]);
-    if (value != null)
-      return mustache.escape(value);
-  };
-
-  Writer.prototype.rawValue = function rawValue (token) {
-    return token[1];
-  };
-
-  mustache.name = 'mustache.js';
-  mustache.version = '2.2.0';
-  mustache.tags = [ '{{', '}}' ];
-
-  // All high-level mustache.* functions use this writer.
-  var defaultWriter = new Writer();
-
-  /**
-   * Clears all cached templates in the default writer.
-   */
-  mustache.clearCache = function clearCache () {
-    return defaultWriter.clearCache();
-  };
-
-  /**
-   * Parses and caches the given template in the default writer and returns the
-   * array of tokens it contains. Doing this ahead of time avoids the need to
-   * parse templates on the fly as they are rendered.
-   */
-  mustache.parse = function parse (template, tags) {
-    return defaultWriter.parse(template, tags);
-  };
-
-  /**
-   * Renders the `template` with the given `view` and `partials` using the
-   * default writer.
-   */
-  mustache.render = function render (template, view, partials) {
-    if (typeof template !== 'string') {
-      throw new TypeError('Invalid template! Template should be a "string" ' +
-                          'but "' + typeStr(template) + '" was given as the first ' +
-                          'argument for mustache#render(template, view, partials)');
-    }
-
-    return defaultWriter.render(template, view, partials);
-  };
-
-  // This is here for backwards compatibility with 0.4.x.,
-  /*eslint-disable */ // eslint wants camel cased function name
-  mustache.to_html = function to_html (template, view, partials, send) {
-    /*eslint-enable*/
-
-    var result = mustache.render(template, view, partials);
-
-    if (isFunction(send)) {
-      send(result);
-    } else {
-      return result;
-    }
-  };
-
-  // Export the escaping function so that the user may override it.
-  // See https://github.com/janl/mustache.js/issues/244
-  mustache.escape = escapeHtml;
-
-  // Export these mainly for testing, but also for advanced usage.
-  mustache.Scanner = Scanner;
-  mustache.Context = Context;
-  mustache.Writer = Writer;
 
 }));
 

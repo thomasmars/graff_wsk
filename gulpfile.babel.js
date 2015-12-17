@@ -128,18 +128,16 @@ gulp.task('watchify', function(){
       .bundle()
       .pipe(source('bundle.js'))
       // destination changes when `dist` is set to true
-      .pipe(gulp.dest( dist ? 'dist/scripts' : './app/build/' ))
-      .pipe(reload({stream: true, once: true}));
+      .pipe(gulp.dest( dist ? 'dist/scripts' : './app/build/' ));
   };
   // rebundle on change
-  bundler.on('update', bundle);
   return bundle();
 });
 
 // Concatenate and minify JavaScript. Optionally transpiles ES2015 code to ES5.
 // to enables ES2015 support remove the line `"only": "gulpfile.babel.js",` in the
 // `.babelrc` file.
-gulp.task('scripts', () =>
+/*gulp.task('scripts', () =>
     gulp.src([
       // Note: Since we are not using useref in the scripts build pipeline,
       //       you need to explicitly list your scripts here in the right order
@@ -163,7 +161,7 @@ gulp.task('scripts', () =>
       .pipe($.size({title: 'scripts'}))
       .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest('dist/scripts'))
-);
+);*/
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', () => {
@@ -208,10 +206,10 @@ gulp.task('serve', ['watchify', 'styles'], () => {
     port: 3000
   });
 
-  gulp.watch(['app/**/*.html'], reload);
-  gulp.watch(['app/styles/**/*.{scss,css}'], ['styles', reload]);
-  gulp.watch(['app/scripts/**/*.js'], ['lint', 'scripts']);
-  gulp.watch(['app/images/**/*'], reload);
+/*  gulp.watch(['app/!**!/!*.html'], reload);
+  gulp.watch(['app/styles/!**!/!*.{scss,css}'], ['styles', reload]);
+  gulp.watch(['app/scripts/!**!/!*.js'], ['lint', 'watchify']);
+  gulp.watch(['app/images/!**!/!*'], reload);*/
 });
 
 // Build and serve the output from the dist build
@@ -234,7 +232,7 @@ gulp.task('serve:dist', ['default'], () =>
 gulp.task('default', ['clean'], cb =>
   runSequence(
     'styles',
-    ['lint', 'html', 'scripts', 'images', 'fonts', 'copy'],
+    ['lint', 'html', 'watchify', 'images', 'fonts', 'copy'],
     'generate-service-worker',
     cb
   )
