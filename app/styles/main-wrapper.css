@@ -19,65 +19,25 @@
 }
 
 body {
-  overflow: hidden;
-  margin: 0;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  position: absolute;
   font-family: Jaapokki, sans-serif;
   color: #000;
 }
 
-.portrait {
-}
-
 .wrapper {
-  position: relative;
-  -webkit-transform: translateY(0%);
-  -ms-transform: translateY(0%);
-  transform: translateY(0%);
-  -webkit-transition: 0.6s -webkit-transform ease-in;
-  transition: 0.6s transform ease-in;
-  height:100%;
-  width:100%;
   background: #fff8e0;
-}
-
-.wrapper.touch-moving {
-  -webkit-transition: none;
-  transition: none;
-}
-
-.wrapper.show-products {
-  -webkit-transform: translateY(-100%);
-  -ms-transform: translateY(-100%);
-  transform: translateY(-100%);
-}
-
-.wrapper.show-contact {
-  -webkit-transform: translateY(-200%);
-  -ms-transform: translateY(-200%);
-  transform: translateY(-200%);
 }
 
 .home,
 .products,
 .contact {
-  position: absolute;
+  position: relative;
   overflow: hidden;
-  height: 100%;
+  height: calc(100vh - 4.5em);
   width: 100%;
 }
 
 .products {
-  top: 100%;
   background: #fff8e0;
-}
-
-.contact {
-  top: 200%;
 }
 
 .img-home,

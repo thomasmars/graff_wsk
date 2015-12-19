@@ -6,11 +6,11 @@ var ResourceLoader = function () {
   var self = this;
 
   self.initMixItUp = function () {
-/*    $('.products-display').mixItUp({
+    $('.products-display').mixItUp({
       animation: {
         effects: 'fade'
       }
-    });*/
+    });
   };
 
   $(window).on('touchmove', function (e) {

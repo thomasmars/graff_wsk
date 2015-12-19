@@ -206,10 +206,10 @@ gulp.task('serve', ['watchify', 'styles'], () => {
     port: 3000
   });
 
-/*  gulp.watch(['app/!**!/!*.html'], reload);
+  gulp.watch(['app/**/*.html'], reload);
   gulp.watch(['app/styles/!**!/!*.{scss,css}'], ['styles', reload]);
-  gulp.watch(['app/scripts/!**!/!*.js'], ['lint', 'watchify']);
-  gulp.watch(['app/images/!**!/!*'], reload);*/
+  //gulp.watch(['app/scripts/!**!/!*.js'], ['lint', 'watchify']);
+  //gulp.watch(['app/images/!**/!*'], reload);
 });
 
 // Build and serve the output from the dist build
