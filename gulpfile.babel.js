@@ -72,6 +72,11 @@ gulp.task('fonts', () => {
   ]).pipe(gulp.dest('dist/fonts'))
 });
 
+gulp.task('watch', ['scripts', 'styles'], () => {
+  gulp.watch(['app/styles/*.css'], ['styles']);
+  gulp.watch(['app/scripts/**/*.js'], ['scripts']);
+});
+
 // Copy all files at the root level (app)
 gulp.task('copy', () =>
   gulp.src([
@@ -100,8 +105,8 @@ gulp.task('styles', () => {
 
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'app/styles/**/*.scss',
-    'app/styles/**/*.css'
+    'app/styles/*.scss',
+    'app/styles/*.css'
   ])
     .pipe($.newer('.tmp/styles'))
     .pipe($.sourcemaps.init())
@@ -121,7 +126,7 @@ gulp.task('styles', () => {
 /**
  * BROWSERIFY / WATCHIFY TASK ADDED HERE
  */
-gulp.task('watchify', function(){
+gulp.task('scripts', function(){
   var bundler = browserify('./app/scripts/main.js');
   var bundle = function() {
     return bundler
@@ -191,7 +196,7 @@ gulp.task('html', () => {
 gulp.task('clean', cb => del(['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
 
 // Watch files for changes & reload
-gulp.task('serve', ['watchify', 'styles'], () => {
+gulp.task('serve', ['scripts', 'styles'], () => {
   browserSync({
     notify: false,
     // Customize the Browsersync console logging prefix
@@ -208,7 +213,7 @@ gulp.task('serve', ['watchify', 'styles'], () => {
 
   gulp.watch(['app/**/*.html'], reload);
   gulp.watch(['app/styles/!**!/!*.{scss,css}'], ['styles', reload]);
-  //gulp.watch(['app/scripts/!**!/!*.js'], ['lint', 'watchify']);
+  gulp.watch(['app/scripts/!**!/!*.js'], ['lint', 'scripts']);
   //gulp.watch(['app/images/!**/!*'], reload);
 });
 
@@ -232,7 +237,7 @@ gulp.task('serve:dist', ['default'], () =>
 gulp.task('default', ['clean'], cb =>
   runSequence(
     'styles',
-    ['lint', 'html', 'watchify', 'images', 'fonts', 'copy'],
+    ['lint', 'html', 'scripts', 'images', 'fonts', 'copy'],
     'generate-service-worker',
     cb
   )

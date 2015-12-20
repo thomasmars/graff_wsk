@@ -24,7 +24,7 @@ body {
 }
 
 .wrapper {
-  background: #fff8e0;
+  background: #FAF6E2;
 }
 
 .home,
@@ -32,37 +32,17 @@ body {
 .contact {
   position: relative;
   overflow: hidden;
-  height: calc(100vh - 4.5em);
+  height: 100vh;
   width: 100%;
 }
 
+.home {
+  height: calc(75vh - 4.5em);
+}
 .products {
-  background: #fff8e0;
+  background: #FAF6E2;
 }
 
-.img-home,
-.img-contact,
-.img-products {
-  position: relative;
-  width: 100%;
-  height: auto;
-}
-
-.img-home {
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
-}
-
-.img-contact {
-  position: relative;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
 
 .portrait .img-contact {
   top: 0;

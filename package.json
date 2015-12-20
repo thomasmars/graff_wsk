@@ -51,6 +51,7 @@
     "extends": "google"
   },
   "dependencies": {
-    "gulp": "^3.9.0"
+    "gulp": "^3.9.0",
+    "material-design-lite": "^1.0.6"
   }
 }

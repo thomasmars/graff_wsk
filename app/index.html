@@ -24,7 +24,7 @@
     material.blue-orange.min.css
     material.purple-indigo.min.css
     -->
-    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.orange-amber.min.css" />
+    <link rel="stylesheet" href="./../node_modules/material-design-lite/material.min.css" />
 
     <!-- Material Design icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -35,21 +35,36 @@
   </head>
   <body class="mdl-base">
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-      <header class="mdl-layout__header">
-        <div class="mdl-layout__header-row">
-          <div class="menu-main">
-            <div class="button-home">Home</div>
-            <div class="button-products">Products</div>
-            <div class="button-contact">Contact</div>
+      <header class="mdl-layout__header mdl-layout__header--waterfall mdl-color-text--black header-complete">
+        <div class="mdl-layout__header-row menu-main">
+          <nav class="mdl-navigation header-navigation mdl-layout--large-screen-only">
+            <a href="#home" class="button-home">Home</a>
+            <a href="#products" class="button-products">Products</a>
+            <a href="#contact" class="button-contact">Contact</a>
+          </nav>
+          <div class="mdl-layout--small-screen-only">
+            <div class="mdl-layout-spacer"></div>
+            <img class="small-logo" src="images/logo-simple.png">
           </div>
         </div>
+        <div class="mdl-layout__header-row waterfall-header mdl-layout--large-screen-only">
+          <img class="header-logo" src="./images/logo.png" />
+        </div>
       </header>
+      <div class="mdl-layout__drawer mdl-layout--small-screen-only">
+        <span class="mdl-layout-title">Graff Brygghus</span>
+        <nav class="mdl-navigation">
+          <a href="#home" class="mdl-navigation__link">Home</a>
+          <a href="#products" class="mdl-navigation__link">Products</a>
+          <a href="#contact" class="mdl-navigation__link">Contact</a>
+        </nav>
+      </div>
       <main class="mdl-layout__content wrapper">
-        <div class="home">
+        <div class="home" id="home">
           <img class="img-home" src="images/eske-xs.jpg">
         </div>
-        <div class="products"></div>
-        <div class="contact">
+        <div class="products" id="products"></div>
+        <div class="contact" id="contact">
           <img class="img-contact" src="images/gruppebilde-xs.jpg">
           <div class="contact-info">
             <div class="contact-info-inner">
@@ -80,10 +95,8 @@
       </main>
     </div>
 
-    <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtNRjBxS2k_MywbRKdrgM8edIx8DSeapA&libraries=places">
-    </script>
+    <script src="./../node_modules/material-design-lite/material.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtNRjBxS2k_MywbRKdrgM8edIx8DSeapA&libraries=places"></script>
     <!-- build:js(app/) ../../scripts/main.min.js -->
     <!--DEV-->
     <!--<script src="scripts/main.js"></script>-->

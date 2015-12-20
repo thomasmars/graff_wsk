@@ -244,15 +244,11 @@
   left: 50%;
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
-  background-color: #fff8e0;
-  opacity: 0.4;
+  background-color: #FAF6E2;
+  opacity: 0;
   -webkit-transition: opacity 0.5s;
   transition: opacity 0.5s;
   cursor: pointer;
-}
-
-.products-display .overlay:hover {
-  opacity: 0;
 }
 
 .products-list .controls-filter {

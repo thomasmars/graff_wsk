@@ -9,18 +9,16 @@
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-  var TouchControls = require('./touch-controls');
 
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
   var imageRoll = require('../templates/image-roll.mustache');
   var productPages = require('../templates/product-pages.mustache');
 
-  console.log("TEST!");
-
+  /**
+   * @deprecated
+   */
   var adjustFontSize = function () {
-    console.log("window resize", $(window).width());
-    console.log("new font size");
     var step = 50;
     var threshold = 600;
     var standardFont = 16;
@@ -33,17 +31,30 @@
     }
     else {
 
-      console.log("reset font size");
       // Reset font size
       $('body').css('font-size', '');
     }
+  };
+
+  var animateToElement = function ($element) {
+    var $scrollable = $('main');
+    console.log("element offset", $element.offset().top);
+    console.log("main offset", $scrollable.offset().top);
+    console.log("current scroll", $scrollable.scrollTop());
+    var currentScroll = $scrollable.scrollTop();
+    var scrollTo = $element.offset().top - $scrollable.offset().top + currentScroll;
+    var scrollTimer = scrollTo - currentScroll;
+    $scrollable
+      .stop()
+      .animate({
+        scrollTop: scrollTo
+      }, Math.abs(scrollTimer / 2));
   };
 
   $(document).ready(function(){
     var $wrapper = $('.wrapper');
 
     // Load images and clones
-    console.log("ResourceLoader", ResourceLoader);
     var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
@@ -59,14 +70,12 @@
         .then(function () {
 
           // Init mix it up
-          console.log(resourceLoader);
           resourceLoader.initMixItUp();
 
 
           // Enable product page functionality
-          var slideControls = new SlideControls($wrapper);
-          new TouchControls($wrapper, slideControls);
           var productsPage = new ProductsPage(view);
+          new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
           new ContactPage();
 
@@ -76,17 +85,12 @@
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
 
-          // Set font size
-          console.log("what is width ?");
-          console.log($(window).width());
-          console.log(screen.width);
-
-          $(window).resize(function () {
-            adjustFontSize();
-            productsPage.orientationResize();
-          });
-          adjustFontSize();
-          productsPage.orientationResize();
+          $('a').click(function () {
+            var href = $.attr(this, 'href');
+            var $target = $( $.attr(this, 'href') );
+            animateToElement($target);
+            return false;
+          })
         });
     });
   });
@@ -96,10 +100,9 @@
     event.preventDefault();
   });
 
-
 })();
 
-},{"../pages/contact-page":8,"../pages/products-page":9,"../templates/image-roll.mustache":10,"../templates/product-pages.mustache":11,"../templates/products-main.mustache":12,"./header":2,"./resource-loader":3,"./slide-controls":4,"./touch-controls":5,"jquery":14}],2:[function(require,module,exports){
+},{"../pages/contact-page":7,"../pages/products-page":8,"../templates/image-roll.mustache":9,"../templates/product-pages.mustache":10,"../templates/products-main.mustache":11,"./header":2,"./resource-loader":3,"./slide-controls":4,"jquery":13}],2:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
@@ -121,25 +124,22 @@ GraffHeader.prototype.initClickListeners = function () {
   var self = this;
 
   $('.button-home, .img-logo').click(function () {
-    self.$wrapper.removeClass('show-products').removeClass('show-contact');
     self.productsPage.removeFooterColor();
   });
 
   $('.button-products').click(function () {
-    self.$wrapper.removeClass('show-contact').addClass('show-products');
     self.productsPage.removeFooterColor();
     self.productsPage.goHome();
   });
 
   $('.button-contact').click(function () {
-    self.$wrapper.removeClass('show-products').addClass('show-contact');
     self.productsPage.removeFooterColor();
   });
 };
 
 module.exports = GraffHeader;
 
-},{"jquery":14}],3:[function(require,module,exports){
+},{"jquery":13}],3:[function(require,module,exports){
 /**
  * Created by thoma_000 on 17.11.2015.
  */
@@ -218,7 +218,7 @@ var ResourceLoader = function () {
 
 module.exports = ResourceLoader;
 
-},{"jquery":14}],4:[function(require,module,exports){
+},{"jquery":13}],4:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
@@ -262,108 +262,7 @@ SlideControls.prototype.slideUp = function () {
 
 module.exports = SlideControls;
 
-},{"jquery":14}],5:[function(require,module,exports){
-/**
- * Created by thoma_000 on 15.11.2015.
- */
-
-var $ = require('jquery');
-/**
- * @param {jquery} $wrapper Wrapper
- * @param {SlideControls} slideControls Slide controls object
- * @param [touchMoveDelay] Wait an amount of miliseconds before moving with touch listener in case of touch click
- * @param [touchMovePercentageThreshold] The percentage of a page that must be moved before a page will change
- * @constructor
- */
-var TouchControls = function ($wrapper, slideControls, touchMoveDelay, touchMovePercentageThreshold) {
-  this.$wrapper = $wrapper;
-  this.slideControls = slideControls;
-  touchMoveDelay = touchMoveDelay || 100;
-  touchMovePercentageThreshold = touchMovePercentageThreshold || 20;
-  this.initTouchListeners(touchMoveDelay, touchMovePercentageThreshold);
-};
-
-TouchControls.prototype.initTouchListeners = function (touchMoveDelay, touchMovePercentageThreshold) {
-  var self = this;
-  this.touchStartY = 0;
-  this.currentTranslateY = 0;
-  this.touchDiffPercentage = 0;
-  this.touchStartTime = 0;
-  this.startedMoving = false;
-
-  // Touch start
-  $(window).on('touchstart', function (e) {
-    self.touchStartTime = new Date().getTime();
-
-    self.currentTranslateY = 0;
-    if (self.$wrapper.hasClass('show-products')) {
-      self.currentTranslateY = -100;
-    } else if (self.$wrapper.hasClass('show-contact')) {
-      self.currentTranslateY = -200;
-    }
-    self.touchStartY = e.originalEvent.touches[0].pageY;
-  }).on('touchmove', function (e) {
-    if (!self.startedMoving) {
-      var timeElapsed = (new Date().getTime()) - self.touchStartTime;
-      if (timeElapsed > touchMoveDelay) {
-        self.startedMoving = true;
-      } else {
-        return;
-      }
-    }
-    self.$wrapper.addClass('touch-moving');
-    console.log("moving, current translateY", self.currentTranslateY);
-
-    var touchCurrentY = e.originalEvent.touches[0].pageY;
-    var touchDiff = touchCurrentY - self.touchStartY;
-    self.touchDiffPercentage = (touchDiff / self.$wrapper.height()) * 100;
-    if (self.touchDiffPercentage > 100) {
-      self.touchDiffPercentage = 100;
-    } else if (self.touchDiffPercentage < -100) {
-      self.touchDiffPercentage = -100;
-    }
-    var newTouchPercentage = self.currentTranslateY + self.touchDiffPercentage;
-    console.log("newtouch percentage", newTouchPercentage);
-    var maxTouchPercentage = (self.$wrapper.children().length - 1) * -100;
-    console.log("max touch percentage", maxTouchPercentage);
-
-    // Do not allow scrolling out of content
-    if (newTouchPercentage > 0) {
-      newTouchPercentage = 0;
-    }
-    else if (newTouchPercentage < maxTouchPercentage) {
-      newTouchPercentage = maxTouchPercentage;
-    }
-    console.log("new touch percentage", newTouchPercentage);
-
-    self.$wrapper.css({
-      '-webkit-transform': 'translateY(' + newTouchPercentage + '%)',
-      transform: 'translateY(' + newTouchPercentage + '%)'
-    });
-
-  }).on('touchend', function (e) {
-    if (!self.startedMoving) {
-      return
-    }
-
-    self.$wrapper.removeClass('touch-moving').css({
-      '-webkit-transform': '',
-      transform: ''
-    });
-    if (self.touchDiffPercentage > touchMovePercentageThreshold) {
-      self.slideControls.slideUp();
-    } else if (self.touchDiffPercentage < -touchMovePercentageThreshold) {
-      self.slideControls.slideDown();
-    }
-
-    // Get ready for next touch event
-    self.startedMoving = false;
-  });
-};
-
-module.exports = TouchControls;
-
-},{"jquery":14}],6:[function(require,module,exports){
+},{"jquery":13}],5:[function(require,module,exports){
 /**!
  * MixItUp v2.1.11
  *
@@ -2463,7 +2362,7 @@ module.exports = TouchControls;
 
 })(jQuery);
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){
 /*!
  *
@@ -2553,7 +2452,7 @@ module.exports = TouchControls;
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./common/graff.js":1,"./imports/jquery.mixitup.js":6,"jquery":14}],8:[function(require,module,exports){
+},{"./common/graff.js":1,"./imports/jquery.mixitup.js":5,"jquery":13}],7:[function(require,module,exports){
 /**
  * Created by thoma_000 on 01.10.2015.
  */
@@ -2599,7 +2498,7 @@ ContactPage.prototype.initGoogleMap = function () {
 module.exports = ContactPage;
 
 
-},{"jquery":14}],9:[function(require,module,exports){
+},{"jquery":13}],8:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
@@ -3008,13 +2907,13 @@ ProductsPage.prototype.translateProductList = function (percentageTranslate) {
 
 module.exports = ProductsPage;
 
-},{"jquery":14}],10:[function(require,module,exports){
-var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,303,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"mix products-");_.b(_.v(_.f("category-name",c,p,0)));_.b(" img-product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\" data-my-order=\"");_.b(_.v(_.f("order",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"loader-container\">");_.b("\n" + i);_.b("      <div class=\"loader\"></div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("    <div class=\"overlay\"></div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
-},{"hogan.js/lib/template":13}],11:[function(require,module,exports){
+},{"jquery":13}],9:[function(require,module,exports){
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,287,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"mix products-");_.b(_.v(_.f("category-name",c,p,0)));_.b(" img-product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\" data-my-order=\"");_.b(_.v(_.f("order",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"loader-container\">");_.b("\n" + i);_.b("      <div class=\"loader\"></div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <img src=\"images/flasks/");_.b(_.v(_.f("flask-file",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("    <div class=\"overlay\"></div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+},{"hogan.js/lib/template":12}],10:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1192,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner\">");_.b("\n" + i);_.b("      <div class=\"product-info\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
-},{"hogan.js/lib/template":13}],12:[function(require,module,exports){
+},{"hogan.js/lib/template":12}],11:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<div class=\"products-list\">");_.b("\n" + i);_.b("  <div class=\"products-display\">");_.b("\n" + i);_.b("    <div class=\"controls-filter\">");_.b("\n" + i);_.b("      <div class=\"filter-series\">");_.b("\n" + i);_.b("        <button class=\"filter button-all selected\" data-filter=\"all\">ALL</button>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,232,373,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("          <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n");});c.pop();}_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <div class=\"products-display-inner\">");_.b("\n" + i);_.b("      <div class=\"products-image-roll\">");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-inner\">");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,710,750,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("image-roll",c,p,"            "));});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,827,854,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("product-pages",c,p,"    "));});c.pop();}_.b("</div>");_.b("\n");return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
-},{"hogan.js/lib/template":13}],13:[function(require,module,exports){
+},{"hogan.js/lib/template":12}],12:[function(require,module,exports){
 /*
  *  Copyright 2011 Twitter, Inc.
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -3257,7 +3156,7 @@ var Hogan = {};
 })(typeof exports !== 'undefined' ? exports : Hogan);
 
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -12469,4 +12368,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[7]);
+},{}]},{},[6]);

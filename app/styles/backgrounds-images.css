@@ -1,0 +1,23 @@
+.img-home,
+.img-contact,
+.img-products {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.img-home {
+  top: 20%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.img-contact {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}

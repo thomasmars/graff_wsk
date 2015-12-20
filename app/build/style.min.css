@@ -1,3 +1,22 @@
+.img-home,
+.img-contact,
+.img-products {
+  position: relative;
+  width: 100%;
+  height: auto; }
+
+.img-home {
+  top: 20%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%); }
+
+.img-contact {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); }
+
 .google-map-frame {
   position: absolute;
   top: 25%;
@@ -6,7 +25,7 @@
   height: 50%;
   padding: 1em;
   border: 1px solid black;
-  background: #fff8e0; }
+  background: #FAF6E2; }
 
 .portrait .google-map-frame {
   top: 10%;
@@ -36,7 +55,7 @@
   left: 5%;
   top: 25%;
   height: auto;
-  background-color: #fff8e0; }
+  background-color: #FAF6E2; }
 
 .portrait .contact-info {
   left: 1em;
@@ -85,6 +104,9 @@
 .contact-info-inner .contact-info-icon.instagram-icon {
   background-image: url(../images/icons/instagram.png); }
 
+.mdl-layout__drawer {
+  background: #FAF6E2; }
+
 .footer {
   position: absolute;
   width: 100%;
@@ -104,15 +126,8 @@
 
 /* Main menu */
 .menu-main {
-  font-family: Jaapokki, sans-serif;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  z-index: 1;
-  background: #fff8e0;
-  line-height: 4.5em;
-  text-align: center; }
+  position: relative;
+  font-family: Jaapokki, sans-serif; }
 
 /* Menu buttons */
 .button-home,
@@ -135,6 +150,33 @@
   width: auto;
   border-right: 1px solid black; }
 
+.waterfall-header {
+  height: 25vh; }
+
+.header-logo {
+  height: 100%;
+  margin: auto; }
+
+.header-complete {
+  background: #FAF6E2; }
+
+a {
+  color: #000; }
+
+.mdl-navigation.header-navigation {
+  margin: auto; }
+
+.mdl-layout__header .mdl-layout__drawer-button {
+  color: black; }
+
+.small-logo {
+  position: absolute;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%); }
+
 @font-face {
   font-family: Jaapokki;
   src: url("../fonts/Jaapokki/jaapokki-regular.eot");
@@ -150,66 +192,25 @@
   font-style: normal; }
 
 body {
-  overflow: hidden;
-  margin: 0;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  position: absolute; }
+  font-family: Jaapokki, sans-serif;
+  color: #000; }
 
 .wrapper {
-  position: relative;
-  -webkit-transform: translateY(0%);
-  transform: translateY(0%);
-  transition: 0.6s transform ease-in;
-  height: 100%;
-  width: 100%; }
-
-.wrapper.touch-moving {
-  transition: none; }
-
-.wrapper.show-products {
-  -webkit-transform: translateY(-100%);
-  transform: translateY(-100%); }
-
-.wrapper.show-contact {
-  -webkit-transform: translateY(-200%);
-  transform: translateY(-200%); }
+  background: #FAF6E2; }
 
 .home,
 .products,
 .contact {
-  position: absolute;
+  position: relative;
   overflow: hidden;
-  height: 100%;
+  height: 100vh;
   width: 100%; }
 
+.home {
+  height: calc(75vh - 4.5em); }
+
 .products {
-  top: 100%;
-  background: #fff8e0; }
-
-.contact {
-  top: 200%; }
-
-.img-home,
-.img-contact,
-.img-products {
-  position: relative;
-  width: 100%;
-  height: auto; }
-
-.img-home {
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%); }
-
-.img-contact {
-  position: relative;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%); }
+  background: #FAF6E2; }
 
 .portrait .img-contact {
   top: 0;
@@ -253,246 +254,6 @@ body.stillehav .footer-inner,
 body.stout .footer-inner,
 .products-pages.product-stout .product-header .back-to-product {
   background-color: #523423; }
-
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/*
-Note: any .css or .scss files included in the 'styles' directory
-will be correctly compiled during `gulp serve` and `gulp`
- */
-html, body {
-  font-family: 'Roboto', 'Helvetica', sans-serif;
-  margin: 0;
-  padding: 0; }
-
-.mdl-demo .mdl-layout__header-row {
-  padding-left: 40px; }
-
-.mdl-demo .mdl-layout.is-small-screen .mdl-layout__header-row h3 {
-  font-size: inherit; }
-
-.mdl-demo .mdl-layout__tab-bar-button {
-  display: none; }
-
-.mdl-demo .mdl-layout.is-small-screen .mdl-layout__tab-bar .mdl-button {
-  display: none; }
-
-.mdl-demo .mdl-layout:not(.is-small-screen) .mdl-layout__tab-bar,
-.mdl-demo .mdl-layout:not(.is-small-screen) .mdl-layout__tab-bar-container {
-  overflow: visible; }
-
-.mdl-demo .mdl-layout__tab-bar-container {
-  height: 64px; }
-
-.mdl-demo .mdl-layout__tab-bar {
-  padding: 0;
-  padding-left: 16px;
-  box-sizing: border-box;
-  height: 100%;
-  width: 100%; }
-
-.mdl-demo .mdl-layout__tab-bar .mdl-layout__tab {
-  height: 64px;
-  line-height: 64px; }
-
-.mdl-demo .mdl-layout__tab-bar .mdl-layout__tab.is-active::after {
-  background-color: white;
-  height: 4px; }
-
-.mdl-demo main > .mdl-layout__tab-panel {
-  padding: 8px;
-  padding-top: 48px; }
-
-.mdl-demo .mdl-card {
-  height: auto;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column; }
-
-.mdl-demo .mdl-card > * {
-  height: auto; }
-
-.mdl-demo .mdl-card .mdl-card__supporting-text {
-  margin: 40px;
-  -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  padding: 0;
-  color: inherit;
-  width: calc(100% - 80px); }
-
-.mdl-demo.mdl-demo .mdl-card__supporting-text h4 {
-  margin-top: 0;
-  margin-bottom: 20px; }
-
-.mdl-demo .mdl-card__actions {
-  margin: 0;
-  padding: 4px 40px;
-  color: inherit; }
-
-.mdl-demo .mdl-card__actions a {
-  color: #00BCD4;
-  margin: 0; }
-
-.mdl-demo .mdl-card__actions a:hover,
-.mdl-demo .mdl-card__actions a:active {
-  color: inherit;
-  background-color: transparent; }
-
-.mdl-demo .mdl-card__supporting-text + .mdl-card__actions {
-  border-top: 1px solid rgba(0, 0, 0, 0.12); }
-
-.mdl-demo #add {
-  position: absolute;
-  right: 40px;
-  top: 36px;
-  z-index: 999; }
-
-.mdl-demo .mdl-layout__content section:not(:last-of-type) {
-  position: relative;
-  margin-bottom: 48px; }
-
-.mdl-demo section.section--center {
-  max-width: 860px; }
-
-.mdl-demo #features section.section--center {
-  max-width: 620px; }
-
-.mdl-demo section > header {
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-justify-content: center;
-      -ms-flex-pack: center;
-          justify-content: center; }
-
-.mdl-demo section > .section__play-btn {
-  min-height: 200px; }
-
-.mdl-demo section > header > .material-icons {
-  font-size: 3rem; }
-
-.mdl-demo section > button {
-  position: absolute;
-  z-index: 99;
-  top: 8px;
-  right: 8px; }
-
-.mdl-demo section .section__circle {
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-justify-content: flex-start;
-      -ms-flex-pack: start;
-          justify-content: flex-start;
-  -webkit-flex-grow: 0;
-      -ms-flex-positive: 0;
-          flex-grow: 0;
-  -webkit-flex-shrink: 1;
-      -ms-flex-negative: 1;
-          flex-shrink: 1; }
-
-.mdl-demo section .section__text {
-  -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  -webkit-flex-shrink: 0;
-      -ms-flex-negative: 0;
-          flex-shrink: 0;
-  padding-top: 8px; }
-
-.mdl-demo section .section__text h5 {
-  font-size: inherit;
-  margin: 0;
-  margin-bottom: 0.5em; }
-
-.mdl-demo section .section__text a {
-  text-decoration: none; }
-
-.mdl-demo section .section__circle-container > .section__circle-container__circle {
-  width: 64px;
-  height: 64px;
-  border-radius: 32px;
-  margin: 8px 0; }
-
-.mdl-demo section.section--footer .section__circle--big {
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
-  margin: 8px 32px; }
-
-.mdl-demo .is-small-screen section.section--footer .section__circle--big {
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
-  margin: 8px 16px; }
-
-.mdl-demo section.section--footer {
-  padding: 64px 0;
-  margin: 0 -8px -8px -8px; }
-
-.mdl-demo section.section--center .section__text:not(:last-child) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.13); }
-
-.mdl-demo .mdl-card .mdl-card__supporting-text > h3:first-child {
-  margin-bottom: 24px; }
-
-.mdl-demo .mdl-layout__tab-panel:not(#overview) {
-  background-color: white; }
-
-.mdl-demo #features section {
-  margin-bottom: 72px; }
-
-.mdl-demo #features h4, #features h5 {
-  margin-bottom: 16px; }
-
-.mdl-demo .toc {
-  border-left: 4px solid #C1EEF4;
-  margin: 24px;
-  padding: 0;
-  padding-left: 8px;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column; }
-
-.mdl-demo .toc h4 {
-  font-size: 0.9rem;
-  margin-top: 0; }
-
-.mdl-demo .toc a {
-  color: #4DD0E1;
-  text-decoration: none;
-  font-size: 16px;
-  line-height: 28px;
-  display: block; }
-
-.mdl-demo .mdl-menu__container {
-  z-index: 99; }
 
 .products-pages {
   position: absolute;
@@ -712,13 +473,10 @@ html, body {
   left: 50%;
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
-  background-color: #fff8e0;
-  opacity: 0.4;
+  background-color: #FAF6E2;
+  opacity: 0;
   transition: opacity 0.5s;
   cursor: pointer; }
-
-.products-display .overlay:hover {
-  opacity: 0; }
 
 .products-list .controls-filter {
   position: relative;
@@ -830,7 +588,8 @@ html, body {
   -webkit-animation-timing-function: ease;
   animation-timing-function: ease;
   -webkit-animation-iteration-count: infinite;
-  animation-iteration-count: infinite; }
+  animation-iteration-count: infinite;
+  line-height: 1em; }
 
 .products-list .products-image-roll-arrow.right:before {
   content: '\f105'; }
@@ -952,7 +711,7 @@ html, body {
   position: absolute;
   height: 100%;
   width: 100%;
-  background: #fff8e0; }
+  background: #FAF6E2; }
 
 .loader-container.loaded {
   display: none; }

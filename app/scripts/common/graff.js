@@ -8,18 +8,16 @@
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-  var TouchControls = require('./touch-controls');
 
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
   var imageRoll = require('../templates/image-roll.mustache');
   var productPages = require('../templates/product-pages.mustache');
 
-  console.log("TEST!");
-
+  /**
+   * @deprecated
+   */
   var adjustFontSize = function () {
-    console.log("window resize", $(window).width());
-    console.log("new font size");
     var step = 50;
     var threshold = 600;
     var standardFont = 16;
@@ -32,17 +30,30 @@
     }
     else {
 
-      console.log("reset font size");
       // Reset font size
       $('body').css('font-size', '');
     }
+  };
+
+  var animateToElement = function ($element) {
+    var $scrollable = $('main');
+    console.log("element offset", $element.offset().top);
+    console.log("main offset", $scrollable.offset().top);
+    console.log("current scroll", $scrollable.scrollTop());
+    var currentScroll = $scrollable.scrollTop();
+    var scrollTo = $element.offset().top - $scrollable.offset().top + currentScroll;
+    var scrollTimer = scrollTo - currentScroll;
+    $scrollable
+      .stop()
+      .animate({
+        scrollTop: scrollTo
+      }, Math.abs(scrollTimer / 2));
   };
 
   $(document).ready(function(){
     var $wrapper = $('.wrapper');
 
     // Load images and clones
-    console.log("ResourceLoader", ResourceLoader);
     var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
@@ -58,14 +69,12 @@
         .then(function () {
 
           // Init mix it up
-          console.log(resourceLoader);
           resourceLoader.initMixItUp();
 
 
           // Enable product page functionality
-          var slideControls = new SlideControls($wrapper);
-          new TouchControls($wrapper, slideControls);
           var productsPage = new ProductsPage(view);
+          new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
           new ContactPage();
 
@@ -75,17 +84,12 @@
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
 
-          // Set font size
-          console.log("what is width ?");
-          console.log($(window).width());
-          console.log(screen.width);
-
-          $(window).resize(function () {
-            adjustFontSize();
-            productsPage.orientationResize();
-          });
-          adjustFontSize();
-          productsPage.orientationResize();
+          $('a').click(function () {
+            var href = $.attr(this, 'href');
+            var $target = $( $.attr(this, 'href') );
+            animateToElement($target);
+            return false;
+          })
         });
     });
   });
@@ -94,6 +98,5 @@
     console.log("footer touched");
     event.preventDefault();
   });
-
 
 })();

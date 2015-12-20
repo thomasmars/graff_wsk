@@ -7,6 +7,7 @@
         {
           "beer-name": "blonde",
           "file-name": "Blonde-Ale",
+          "flask-file": "blonde-xs",
           "order": 1,
           "poetic-text": "<b>LYS, TØRR</b> og forfriskende tørsteslukker fra Amerika<br>Kald og duggfrisk. Til sommerkvelden og alle andre kvelder.",
           "product-title": "Blonde Ale",
@@ -19,6 +20,7 @@
         {
           "beer-name": "dunkel",
           "file-name": "Dunkel",
+          "flask-file": "dunkel-xs",
           "order": 2,
           "poetic-text": "<b>TRADISJONELL PILS</b> fra Bayern. Mørk, rund og fyldig.<br>Tilbaketrukket bitterhet, fremtredende smak av brød og karamell.",
           "product-title": "Münchener Dunkel",
@@ -31,6 +33,7 @@
         {
           "beer-name": "helles",
           "file-name": "Helles",
+          "flask-file": "helles-xs",
           "order": 3,
           "poetic-text": "<b>EN BAYERSK</b> pils på tysk malt av aller beste kvalitet.<br>Tørr og balansert bitterhet. Som skorpen på et nystekt landbrød.",
           "product-title": "Münchener Helles",
@@ -49,6 +52,7 @@
         {
           "beer-name": "portland",
           "file-name": "Portland",
+          "flask-file": "paleale-xs",
           "order": 4,
           "poetic-text": "<b>HUMLEKARAKTEREN</b> i vår Pale Ale er klassisk vestkyst.<br>Det friske og fuktige balanseres av en forsiktig karamellsødme.",
           "product-title": "Portland Pale Ale",
@@ -61,6 +65,7 @@
         {
           "beer-name": "redhead",
           "file-name": "Red-Head",
+          "flask-file": "redhead-xs",
           "order": 5,
           "poetic-text": "<b>GYLLENRØD</b> som kveldssolen over Stillehavets strender.<br>Skummet tykt og hvitt. Dempet bitterhet, tydelig humlearoma. God.",
           "product-title": "Red Head Red Ale",
@@ -73,6 +78,7 @@
         {
           "beer-name": "session",
           "file-name": "Session-IPA",
+          "flask-file": "session-xs",
           "order": 6,
           "poetic-text": "<b>KLASSISK VESTKYST,</b> frisk smak av sitrus og grapefrukt.<br>En tydelig humlekarakter. Samtidig mild og lett - <i>sessionable</i>.",
           "product-title": "Session IPA",
@@ -85,6 +91,7 @@
         {
           "beer-name": "stillehav",
           "file-name": "Stille-Hav",
+          "flask-file": "stillehav-xs",
           "order": 7,
           "poetic-text": "<b>SELV I STILLE VÆR</b> er Stillehavet brølende, skummende.<br>Stille Hav syder av frisk sitrusfrukt. Velkommen til Vestkysten.",
           "product-title": "Stille Hav IPA",
@@ -103,6 +110,7 @@
         {
           "beer-name": "stout",
           "file-name": "Dry-Stout",
+          "flask-file": "stout-xs",
           "order": 8,
           "poetic-text": "<b>KULLSORT ØL.</b> Tykt, kremet skum. Smak av brent malt.<br>Overrasker ved å være en tørr og forfriskende tørsteslukker.",
           "product-title": "Dry Stout",
