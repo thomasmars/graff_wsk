@@ -59,3 +59,10 @@ a {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.drawer-logo {
+  height: 3.5em;
+  padding: 0;
+  box-sizing: border-box;
+  margin: 0.5em auto 0;
+}

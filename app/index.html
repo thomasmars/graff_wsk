@@ -17,13 +17,7 @@
     <!-- Color the status bar on mobile devices -->
     <meta name="theme-color" content="#2F3BA2">
 
-    <!-- Material Design Lite page styles:
-    You can choose other color schemes from the CDN, more info here http://www.getmdl.io/customize/index.html
-    Format: material.color1-color2.min.css, some examples:
-    material.red-teal.min.css
-    material.blue-orange.min.css
-    material.purple-indigo.min.css
-    -->
+    <!-- Material Design Lite page styles -->
     <link rel="stylesheet" href="./../node_modules/material-design-lite/material.min.css" />
 
     <!-- Material Design icons -->
@@ -52,7 +46,7 @@
         </div>
       </header>
       <div class="mdl-layout__drawer mdl-layout--small-screen-only">
-        <span class="mdl-layout-title">Graff Brygghus</span>
+        <img class="drawer-logo" src="images/cropped-logo.png">
         <nav class="mdl-navigation">
           <a href="#home" class="mdl-navigation__link">Home</a>
           <a href="#products" class="mdl-navigation__link">Products</a>
@@ -60,12 +54,12 @@
         </nav>
       </div>
       <main class="mdl-layout__content wrapper">
-        <div class="home" id="home">
-          <img class="img-home" src="images/eske-xs.jpg">
+        <div class="main-page home mdl-grid--no-spacing" id="home">
+          <img class="mdl-cell--stretch img-home img-backgrounds" src="images/eske-xs.jpg">
         </div>
-        <div class="products" id="products"></div>
-        <div class="contact" id="contact">
-          <img class="img-contact" src="images/gruppebilde-xs.jpg">
+        <div class="main-page products mdl-grid" id="products"></div>
+        <div class="main-page contact" id="contact">
+          <img class="img-contact img-backgrounds" src="images/gruppebilde-xs.jpg">
           <div class="contact-info">
             <div class="contact-info-inner">
               <div class="contact-info-header">Besøk bryggeriet</div>
@@ -97,14 +91,7 @@
 
     <script src="./../node_modules/material-design-lite/material.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtNRjBxS2k_MywbRKdrgM8edIx8DSeapA&libraries=places"></script>
-    <!-- build:js(app/) ../../scripts/main.min.js -->
-    <!--DEV-->
-    <!--<script src="scripts/main.js"></script>-->
-
-    <!--PROD-->
     <script src="build/bundle.js"></script>
-    <!-- endbuild -->
-
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -114,6 +101,5 @@
       ga('create', 'UA-70830407-1', 'auto');
       ga('send', 'pageview');
     </script>
-    <!-- Built with love using Web Starter Kit -->
   </body>
 </html>

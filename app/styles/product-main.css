@@ -1,0 +1,11 @@
+.products-list {
+  padding-bottom: 2.25em;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  -webkit-transform: translateX(0);
+  transform: translateX(0);
+  -webkit-transition: transform 0.8s ease-in-out;
+  transition: transform 0.8s ease-in-out;
+}

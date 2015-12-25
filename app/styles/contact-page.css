@@ -12,7 +12,7 @@
 .portrait .google-map-frame {
   top: 10%;
   left: 50%;
-  width: 45%;
+  width: calc(50% - 3em);
   height: 40%;
 }
 

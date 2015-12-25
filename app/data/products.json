@@ -1,8 +1,8 @@
 {
   "products": [
     {
-      "category-name": "german",
-      "category-full-name": "German Lager Series",
+      "category-name": "american",
+      "category-full-name": "American Ale Series",
       "beer-products": [
         {
           "beer-name": "blonde",
@@ -18,42 +18,10 @@
           "serving-temperature": "4 - 6"
         },
         {
-          "beer-name": "dunkel",
-          "file-name": "Dunkel",
-          "flask-file": "dunkel-xs",
-          "order": 2,
-          "poetic-text": "<b>TRADISJONELL PILS</b> fra Bayern. Mørk, rund og fyldig.<br>Tilbaketrukket bitterhet, fremtredende smak av brød og karamell.",
-          "product-title": "Münchener Dunkel",
-          "alcohol-percentage": "4,7",
-          "type": "Münchener Dunkel",
-          "IBU": 20,
-          "OG": "11,5",
-          "serving-temperature": "4 - 6"
-        },
-        {
-          "beer-name": "helles",
-          "file-name": "Helles",
-          "flask-file": "helles-xs",
-          "order": 3,
-          "poetic-text": "<b>EN BAYERSK</b> pils på tysk malt av aller beste kvalitet.<br>Tørr og balansert bitterhet. Som skorpen på et nystekt landbrød.",
-          "product-title": "Münchener Helles",
-          "alcohol-percentage": "4,4",
-          "type": "Münchener Helles",
-          "IBU": 19,
-          "OG": "11,6",
-          "serving-temperature": "4 - 6"
-        }
-      ]
-    },
-    {
-      "category-name": "american",
-      "category-full-name": "American Ale Series",
-      "beer-products": [
-        {
           "beer-name": "portland",
           "file-name": "Portland",
           "flask-file": "paleale-xs",
-          "order": 4,
+          "order": 2,
           "poetic-text": "<b>HUMLEKARAKTEREN</b> i vår Pale Ale er klassisk vestkyst.<br>Det friske og fuktige balanseres av en forsiktig karamellsødme.",
           "product-title": "Portland Pale Ale",
           "alcohol-percentage": "4,7",
@@ -100,6 +68,38 @@
           "IBU": 55,
           "OG": "16,1",
           "serving-temperature": "8 - 10"
+        }
+      ]
+    },
+    {
+      "category-name": "german",
+      "category-full-name": "German Lager Series",
+      "beer-products": [
+        {
+          "beer-name": "dunkel",
+          "file-name": "Dunkel",
+          "flask-file": "dunkel-xs",
+          "order": 3,
+          "poetic-text": "<b>TRADISJONELL PILS</b> fra Bayern. Mørk, rund og fyldig.<br>Tilbaketrukket bitterhet, fremtredende smak av brød og karamell.",
+          "product-title": "Münchener Dunkel",
+          "alcohol-percentage": "4,7",
+          "type": "Münchener Dunkel",
+          "IBU": 20,
+          "OG": "11,5",
+          "serving-temperature": "4 - 6"
+        },
+        {
+          "beer-name": "helles",
+          "file-name": "Helles",
+          "flask-file": "helles-xs",
+          "order": 4,
+          "poetic-text": "<b>EN BAYERSK</b> pils på tysk malt av aller beste kvalitet.<br>Tørr og balansert bitterhet. Som skorpen på et nystekt landbrød.",
+          "product-title": "Münchener Helles",
+          "alcohol-percentage": "4,4",
+          "type": "Münchener Helles",
+          "IBU": 19,
+          "OG": "11,6",
+          "serving-temperature": "4 - 6"
         }
       ]
     },

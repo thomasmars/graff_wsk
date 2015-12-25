@@ -1,11 +1,28 @@
 <div class="products-list">
   <div class="products-display">
     <div class="controls-filter">
-      <div class="filter-series">
-        <button class="filter button-all selected" data-filter="all">ALL</button>
-        {{#products}}
-          <button class="filter button-{{category-name}}" data-filter=".products-{{category-name}}">{{category-full-name}}</button>
-        {{/products}}
+      <div class="filter-series mdl-grid">
+        <div class="mdl-cell mdl-cell--12-cola mdl-cell--hide-phone mdl-cell--hide-tablet">
+          <button class="filter button-all active" data-filter="all">ALL</button>
+          {{#products}}
+            <button class="filter button-{{category-name}}" data-filter=".products-{{category-name}}">{{category-full-name}}</button>
+          {{/products}}
+        </div>
+        <div class="mdl-cell mdl-cell--hide-desktop">
+          <!-- Right aligned menu below button -->
+          <button id="filters-menu-button" class="mdl-button mdl-js-button mdl-button--icon">
+            <i class="material-icons">more_vert</i>
+          </button>
+          <ul class="graff-background filter-menu mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+              for="filters-menu-button">
+            <li class="filter selected mdl-menu__item" data-filter="all"><button class="filter button-all active" data-filter=".products-{{category-name}}">ALL</button></li>
+            {{#products}}
+              <li class="mdl-menu__item filter" data-filter=".products-{{category-name}}">
+                <button class="filter button-{{category-name}}" data-filter=".products-{{category-name}}">{{category-full-name}}</button>
+              </li>
+            {{/products}}
+          </ul>
+        </div>
       </div>
     </div>
     <div class="products-display-inner">

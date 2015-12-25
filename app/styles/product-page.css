@@ -1,0 +1,119 @@
+.products-pages {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 2.25em;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.products-pages.clone {
+  left: -100%;
+}
+
+.products-pages .product-header {
+  margin-bottom: 0.5em;
+}
+
+.products-pages-inner {
+  max-width: 1000px;
+  padding-bottom: 2.5em;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.products-pages .back-to-product {
+  position: relative;
+  float: left;
+  border: none;
+  color: white;
+  padding: 0.25em 0.5em;
+  font-size: 1.25em;
+  cursor: pointer;
+  width: 2em;
+  height: 1.5em;
+  line-height: 1.5em;
+}
+
+.products-pages .back-to-product {
+  outline: 0;
+}
+
+.products-pages .back-to-product:before {
+  font-family: FontAwesome;
+  position: absolute;
+  content: '\f060';
+  width: 2em;
+  height: 1.5em;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  -webkit-transition: transform 0.2s ease-out;
+  transition: transform 0.2s ease-out;
+}
+
+.products-pages .back-to-product:hover:before {
+  -webkit-transform: translate(-65%, -50%);
+  transform: translate(-65%, -50%);
+}
+
+.products-pages .product-title {
+  font-family: Jaapokki, sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.products-pages .info-field {
+  padding: 1.5em;
+  border: 1px solid black;
+  flex: 2;
+  font-family: "Helvetica", "Arial", sans-serif;
+}
+
+.products-pages .poetic-text {
+  text-align: center;
+  font-size: 1em;
+  margin-bottom: 1.5em;
+}
+
+.info-list {
+  font-size: 0.9em;
+}
+
+.products-pages .info-entry {
+  position: relative;
+  padding: 0.5em 1em;
+  border-top: 1px solid black;
+  width: auto;
+  text-align: left;
+}
+
+.info-entry:last-child {
+  border-bottom: 1px solid black;
+}
+
+.products-pages .info-entry .entry-type {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-right: 1.5em;
+}
+
+.products-pages .info-entry .entry-value {
+
+}
+
+.products-pages .product-images img {
+  max-width: 100%;
+  border: 1px solid black;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.is-small-screen .product-images img {
+  max-height: 40vh;
+}

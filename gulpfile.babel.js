@@ -75,6 +75,7 @@ gulp.task('fonts', () => {
 gulp.task('watch', ['scripts', 'styles'], () => {
   gulp.watch(['app/styles/*.css'], ['styles']);
   gulp.watch(['app/scripts/**/*.js'], ['scripts']);
+  gulp.watch(['app/scripts/**/*.mustache'], ['scripts']);
 });
 
 // Copy all files at the root level (app)

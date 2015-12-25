@@ -15,8 +15,8 @@ var ProductsPage = function (beerData) {
   this.currentImageRollIndex = 0;
   this.clonesLoaded = false;
 
+  this.placeProductPages();
   this.initFilterButtons();
-
   this.initImageButtons();
   this.initProductsButtons();
 
@@ -27,6 +27,7 @@ var ProductsPage = function (beerData) {
     var minSize = $innerRoll.children('.mix').height();
 
     // Set height of inner container
+    console.log("setting min height!", minSize);
     $innerRoll.css('min-height', minSize + 'px');
   };
 
@@ -69,6 +70,12 @@ var ProductsPage = function (beerData) {
 
   $('.products').on('touchstart', function () {
     console.log("started touching");
+  });
+};
+
+ProductsPage.prototype.placeProductPages = function () {
+  $('.products-pages').each(function (idx) {
+    $(this).css('left', ((idx + 1) * 100) + '%');
   });
 };
 
@@ -155,7 +162,8 @@ ProductsPage.prototype.resizeProductRoll = function () {
 
     var reduceImageSize = function ($images, currWidth) {
       var newWidth = currWidth - decrementPercentage;
-      $images.css('width', newWidth + '%');
+      console.log("reduce image size", newWidth);
+      //$images.css('width', newWidth + '%');
     };
 
     var imagesTooBig = true;
@@ -183,7 +191,7 @@ ProductsPage.prototype.loadClones = function () {
   var clonesLoaded = 0;
   var totalClones = $productPages.length;
   $productPages.each(function () {
-    var left = ((self.totalProductPages + 1 - (parseInt($(this).css('left'))) / $productPages.width())) * -100;
+    var left = (self.totalProductPages + 1 - $(this).index()) * -100;
     var $clone = $(this).clone()
       .css('left', left + '%')
       .addClass('clone')
@@ -206,6 +214,7 @@ ProductsPage.prototype.initProductsButtons = function () {
 };
 
 ProductsPage.prototype.initImageRollButtons = function () {
+  console.log("init image roll buttons");
   var self = this;
   var $mixElements = this.$productsList.find('.mix');
   var scrollAmount = $mixElements.get(0).offsetWidth;
@@ -219,6 +228,7 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowLeft.unbind('click')
     .click(function () {
+      console.log("clicked arrow left");
 
       // Already at min index
       if (self.currentImageRollIndex === 0) {
@@ -241,6 +251,11 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowRight.unbind('click')
     .click(function () {
+      console.log("clicked arrow right");
+
+      console.log("image roll index, ", self.currentImageRollIndex);
+      console.log("visible elements", visibleElements);
+      console.log("roll elements", rollElements);
 
       // All images already shown
       if (self.currentImageRollIndex + 1 + visibleElements > rollElements) {
@@ -250,7 +265,12 @@ ProductsPage.prototype.initImageRollButtons = function () {
       // Decrease current image roll index
       self.currentImageRollIndex += 1;
 
+
+      console.log("current image roll index", self.currentImageRollIndex);
+      console.log("visible elements", visibleElements);
+      console.log("roll elements", rollElements);
       if (self.currentImageRollIndex + visibleElements >= rollElements) {
+        console.log("fade to hidden ?");
         self.fadeToHidden(self.$imageRollArrowRight);
       }
       self.fadeToShown(self.$imageRollArrowLeft);
@@ -258,6 +278,7 @@ ProductsPage.prototype.initImageRollButtons = function () {
       // Negative translation
       scrollAmount = $mixElements.get(0).offsetWidth;
 
+      console.log("setting image roll translate");
       self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
     });
 
@@ -274,12 +295,10 @@ ProductsPage.prototype.initImageRollButtons = function () {
 ProductsPage.prototype.setImageRollTranslate = function (value) {
   var self = this;
   value = value ? value : 0;
-  if (!self.isPortrait) {
-    this.$innerImageRoll.css({
-      '-webkit-transform': 'translateX(' + value + 'px)',
-      transform: 'translateX(' + value + 'px)'
-    })
-  }
+  this.$innerImageRoll.css({
+    '-webkit-transform': 'translateX(' + value + 'px)',
+    transform: 'translateX(' + value + 'px)'
+  })
 };
 
 ProductsPage.prototype.getImageAmounts = function () {
@@ -295,7 +314,9 @@ ProductsPage.prototype.fadeToToggle = function ($element, boolean) {
 };
 
 ProductsPage.prototype.fadeToHidden = function ($element) {
+  console.log("fading to hidden", $element);
   $element.addClass('hiding').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (f) {
+    console.log("on animation end...");
     $element.addClass('hidden');
 
     // Make sure event is only triggered once.
@@ -315,21 +336,16 @@ ProductsPage.prototype.initGoHomeButtons = function ($buttons) {
 };
 
 ProductsPage.prototype.initFilterButtons = function () {
-  var self = this;
+  $('.filter-series button.filter').click(function () {
 
-  $('.filter-series button')
-    .on('touchstart', function () {
-      $(this).addClass('no-hover');
-    }).click(function () {
-
+    console.log("clicked ", $(this));
     // Remove all active classes for buttons
-    $('.filter-series button').each(function () {
+    $('.filter-series button.filter').each(function () {
       $(this).removeClass('active');
     });
 
     // Add active state to this button
     $(this).addClass('active');
-    $(this).removeClass('no-hover');
   });
 };
 
@@ -337,7 +353,7 @@ ProductsPage.prototype.initImageButtons = function () {
   var self = this;
   $('.products-display .mix').each(function () {
     $(this).click(function () {
-      var beerIndex = $(this).attr('data-my-order');
+      var beerIndex = $(this).index() + 1;
       self.$productsList.addClass('has-moved');
       if (beerIndex === 0) {
         self.$productsList.removeClass('has-moved');

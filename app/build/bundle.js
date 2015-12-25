@@ -3,6 +3,7 @@
  * Created by Thomas Marstrander on 20.08.2015.
  */
 (function () {
+  var self = this;
   var $ = require('jquery');
   var SlideControls = require('./slide-controls');
   var GraffHeader = require('./header');
@@ -15,47 +16,8 @@
   var imageRoll = require('../templates/image-roll.mustache');
   var productPages = require('../templates/product-pages.mustache');
 
-  /**
-   * @deprecated
-   */
-  var adjustFontSize = function () {
-    var step = 50;
-    var threshold = 600;
-    var standardFont = 16;
-    var remainder = threshold - $(window).width();
-    if (remainder >= 0) {
-      var fontReduction = Math.ceil(remainder / step);
-      var newFont = standardFont - fontReduction;
-      console.log("new font size", newFont);
-      $('body').css('font-size', newFont + 'px');
-    }
-    else {
-
-      // Reset font size
-      $('body').css('font-size', '');
-    }
-  };
-
-  var animateToElement = function ($element) {
-    var $scrollable = $('main');
-    console.log("element offset", $element.offset().top);
-    console.log("main offset", $scrollable.offset().top);
-    console.log("current scroll", $scrollable.scrollTop());
-    var currentScroll = $scrollable.scrollTop();
-    var scrollTo = $element.offset().top - $scrollable.offset().top + currentScroll;
-    var scrollTimer = scrollTo - currentScroll;
-    $scrollable
-      .stop()
-      .animate({
-        scrollTop: scrollTo
-      }, Math.abs(scrollTimer / 2));
-  };
-
   $(document).ready(function(){
     var $wrapper = $('.wrapper');
-
-    // Load images and clones
-    var resourceLoader = new ResourceLoader();
 
     // Load Mustache content
     $.getJSON('data/products.json', function (view) {
@@ -64,16 +26,13 @@
       $(productsMain.render(view, {
         'image-roll': imageRoll,
         'product-pages': productPages
-      }))
-        .appendTo($('.products'))
+      })).appendTo($('.products'))
         .promise()
         .then(function () {
 
-          // Init mix it up
-          resourceLoader.initMixItUp();
-
-
-          // Enable product page functionality
+          // Init
+          self.resourceLoader = new ResourceLoader();
+          self.resourceLoader.resizeBackgroundImages();
           var productsPage = new ProductsPage(view);
           new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
@@ -84,19 +43,17 @@
 
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
-
-          $('a').click(function () {
-            var href = $.attr(this, 'href');
-            var $target = $( $.attr(this, 'href') );
-            animateToElement($target);
-            return false;
-          })
         });
     });
   });
 
+  $(window).resize(function () {
+    if (self.resourceLoader) {
+      self.resourceLoader.resizeBackgroundImages();
+    }
+  })
+
   $('.footer').on('touchstart', function (event) {
-    console.log("footer touched");
     event.preventDefault();
   });
 
@@ -144,75 +101,35 @@ module.exports = GraffHeader;
  * Created by thoma_000 on 17.11.2015.
  */
 var $ = require('jquery');
+
+/**
+ * Init mix it up library
+ */
+var initMixItUp = function () {
+  $('.products-display').mixItUp({
+    animation: {
+      effects: 'fade'
+    }
+  });
+};
+
 var ResourceLoader = function () {
   var self = this;
+  initMixItUp();
 
-  self.initMixItUp = function () {
-    $('.products-display').mixItUp({
-      animation: {
-        effects: 'fade'
+  self.resizeBackgroundImages = function () {
+    var $backgroundImages = $('.img-backgrounds');
+
+    $backgroundImages.each(function () {
+
+      // Fit to height
+      if ($(this).height() < $(this).parent().height()) {
+        $(this).addClass('vertical-fit');
+      } // Fit to width
+      else if ($(this).width() < $(this).parent().width()) {
+        $(this).removeClass('vertical-fit');
       }
     });
-  };
-
-  $(window).on('touchmove', function (e) {
-    e.preventDefault();
-  });
-
-  var imageResize = function ($img) {
-
-    var natWidth = $img.get(0).naturalWidth;
-    var natHeight = $img.get(0).naturalHeight;
-    var imgRatio = natWidth / natHeight;
-
-    var width = $(window).width();
-    var height = $(window).height();
-    var windowRatio = width / height;
-
-    if (imgRatio > windowRatio) {
-      // Must scale image to wrapper height
-      $img.css({
-        'height': height,
-        'width': 'auto',
-        'top': ''
-      });
-    } else {
-      // Height too big, must center image
-      var newHeight = width / imgRatio;
-
-      // Remove top height
-/*        var top = newHeight - height;
-      if ($img.hasClass('img-contact')) {
-        // Add 10 %
-        top -= (newHeight / 9);
-      }*/
-
-      $img.css({
-        'width': width,
-        'height': 'auto'
-/*          'top': -top*/
-      })
-    }
-  };
-
-  var initMainImagesLoad = function () {
-    var $mainImages = $('.img-home, .img-contact');
-
-    var resizeImages = function () {
-      $mainImages.each(function () {
-        imageResize($(this));
-      });
-    };
-
-    resizeImages();
-    $(window).resize(function () {
-      resizeImages();
-    });
-  };
-
-  self.init = function () {
-    initMainImagesLoad();
-    return self;
   }
 };
 
@@ -224,40 +141,116 @@ module.exports = ResourceLoader;
  */
 var $ = require('jquery');
 var SlideControls = function ($wrapper) {
-  var self = this;
+  console.log("wrapper ?", $wrapper);
   this.$wrapper = $wrapper;
-  this.initKeyboardListeners();
+  this.initScrollToElementAnchors();
+  this.addScrollToClosestElementListener();
 };
 
-SlideControls.prototype.initKeyboardListeners = function () {
+/**
+ * Adds a listener that scrolls to the closest page element after a scroll has been performed
+ */
+SlideControls.prototype.addScrollToClosestElementListener = function () {
   var self = this;
-  $(window).keydown(function (e) {
-    if (e.which === 40) { // Arrow down
-      self.slideDown();
-    } else if (e.which === 38) { // Arrow up
-      self.slideUp();
+  this.$wrapper.scroll(function () {
+
+    // Auto scrolling is performed
+    clearTimeout(self.scrollTimer);
+    if (self.autoScrolling) {
+      return;
     }
+    self.scrollTimer = setTimeout(function () {
+      console.log(self.$wrapper.scrollTop());
+      self.scrollToClosestTarget();
+    }, 500);
+  });
+};
+
+/**
+ * Add scroll listener to slide to closest slide.
+ */
+SlideControls.prototype.scrollToClosestTarget = function () {
+  var $targets = this.$wrapper.children();
+  var $closest = findClosestScrollTarget($targets, this.$wrapper);
+  this.scrollToElement($closest);
+};
+
+/**
+ * Find closest scroll target from current scroll
+ * @param {jQuery} $targets
+ * @param {number} currentScroll
+ * @returns {jQuery} $closest
+ */
+var findClosestScrollTarget = function ($targets, $wrapper) {
+  var $closest = $targets.get(0);
+  var closestDiff;
+
+  $targets.each(function () {
+    var targetDiff = Math.abs($(this).offset().top - $wrapper.offset().top);
+
+    // Set current diff
+    if (!closestDiff) {
+      $closest = $(this);
+      closestDiff = targetDiff;
+    }
+    else if (targetDiff < closestDiff) {
+      $closest = $(this);
+      closestDiff = targetDiff;
+    }
+
+  });
+
+  return $closest;
+};
+
+/**
+ * Slide down to the next page
+ * @param {boolean} [slideUp] Slide up instead of down
+ */
+SlideControls.prototype.slide = function (slideUp) {
+  var $currentPage = this.$wrapper.children().is('.active');
+  var $nextPage = $currentPage.next();
+  if (slideUp) {
+    $nextPage = $currentPage.prev();
+  }
+  if ($nextPage) {
+    this.scrollToElement($nextPage);
+  }
+  $('body').trigger('changed-slide');
+};
+
+/**
+ * Scroll to element
+ * @param {jQuery} $element
+ */
+SlideControls.prototype.scrollToElement = function ($element) {
+  var self = this;
+  this.$wrapper.children().removeClass('active');
+  var currentScroll = this.$wrapper.scrollTop();
+  var scrollTo = $element.offset().top - this.$wrapper.offset().top + currentScroll;
+  this.autoScrolling = true;
+  this.$wrapper.stop()
+    .animate({
+      scrollTop: scrollTo
+    }, {
+      duration: 500,
+      complete: function () {
+        setTimeout(function () {
+          self.autoScrolling = false;
+        }, 100);
+      }
+    });
+  $element.addClass('active');
+};
+
+SlideControls.prototype.initScrollToElementAnchors = function () {
+  var self = this;
+  $('a').click(function () {
+    var href = $.attr(this, 'href');
+    var $target = $( $.attr(this, 'href') );
+    self.scrollToElement($target);
+    return false;
   })
-};
-
-SlideControls.prototype.slideDown = function () {
-  if (this.$wrapper.hasClass('show-contact')) {
-    return;
-  } else if (this.$wrapper.hasClass('show-products')) {
-    this.$wrapper.removeClass('show-products').addClass('show-contact');
-  } else {
-    this.$wrapper.addClass('show-products');
-  }
-  $('body').trigger('changed-slide');
-};
-
-SlideControls.prototype.slideUp = function () {
-  if (this.$wrapper.hasClass('show-contact')) {
-    this.$wrapper.removeClass('show-contact').addClass('show-products');
-  } else if (this.$wrapper.hasClass('show-products')) {
-    this.$wrapper.removeClass('show-products');
-  }
-  $('body').trigger('changed-slide');
 };
 
 module.exports = SlideControls;
@@ -2516,8 +2509,8 @@ var ProductsPage = function (beerData) {
   this.currentImageRollIndex = 0;
   this.clonesLoaded = false;
 
+  this.placeProductPages();
   this.initFilterButtons();
-
   this.initImageButtons();
   this.initProductsButtons();
 
@@ -2528,6 +2521,7 @@ var ProductsPage = function (beerData) {
     var minSize = $innerRoll.children('.mix').height();
 
     // Set height of inner container
+    console.log("setting min height!", minSize);
     $innerRoll.css('min-height', minSize + 'px');
   };
 
@@ -2570,6 +2564,12 @@ var ProductsPage = function (beerData) {
 
   $('.products').on('touchstart', function () {
     console.log("started touching");
+  });
+};
+
+ProductsPage.prototype.placeProductPages = function () {
+  $('.products-pages').each(function (idx) {
+    $(this).css('left', ((idx + 1) * 100) + '%');
   });
 };
 
@@ -2656,7 +2656,8 @@ ProductsPage.prototype.resizeProductRoll = function () {
 
     var reduceImageSize = function ($images, currWidth) {
       var newWidth = currWidth - decrementPercentage;
-      $images.css('width', newWidth + '%');
+      console.log("reduce image size", newWidth);
+      //$images.css('width', newWidth + '%');
     };
 
     var imagesTooBig = true;
@@ -2684,7 +2685,7 @@ ProductsPage.prototype.loadClones = function () {
   var clonesLoaded = 0;
   var totalClones = $productPages.length;
   $productPages.each(function () {
-    var left = ((self.totalProductPages + 1 - (parseInt($(this).css('left'))) / $productPages.width())) * -100;
+    var left = (self.totalProductPages + 1 - $(this).index()) * -100;
     var $clone = $(this).clone()
       .css('left', left + '%')
       .addClass('clone')
@@ -2707,6 +2708,7 @@ ProductsPage.prototype.initProductsButtons = function () {
 };
 
 ProductsPage.prototype.initImageRollButtons = function () {
+  console.log("init image roll buttons");
   var self = this;
   var $mixElements = this.$productsList.find('.mix');
   var scrollAmount = $mixElements.get(0).offsetWidth;
@@ -2720,6 +2722,7 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowLeft.unbind('click')
     .click(function () {
+      console.log("clicked arrow left");
 
       // Already at min index
       if (self.currentImageRollIndex === 0) {
@@ -2742,6 +2745,11 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowRight.unbind('click')
     .click(function () {
+      console.log("clicked arrow right");
+
+      console.log("image roll index, ", self.currentImageRollIndex);
+      console.log("visible elements", visibleElements);
+      console.log("roll elements", rollElements);
 
       // All images already shown
       if (self.currentImageRollIndex + 1 + visibleElements > rollElements) {
@@ -2751,7 +2759,12 @@ ProductsPage.prototype.initImageRollButtons = function () {
       // Decrease current image roll index
       self.currentImageRollIndex += 1;
 
+
+      console.log("current image roll index", self.currentImageRollIndex);
+      console.log("visible elements", visibleElements);
+      console.log("roll elements", rollElements);
       if (self.currentImageRollIndex + visibleElements >= rollElements) {
+        console.log("fade to hidden ?");
         self.fadeToHidden(self.$imageRollArrowRight);
       }
       self.fadeToShown(self.$imageRollArrowLeft);
@@ -2759,6 +2772,7 @@ ProductsPage.prototype.initImageRollButtons = function () {
       // Negative translation
       scrollAmount = $mixElements.get(0).offsetWidth;
 
+      console.log("setting image roll translate");
       self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
     });
 
@@ -2775,12 +2789,10 @@ ProductsPage.prototype.initImageRollButtons = function () {
 ProductsPage.prototype.setImageRollTranslate = function (value) {
   var self = this;
   value = value ? value : 0;
-  if (!self.isPortrait) {
-    this.$innerImageRoll.css({
-      '-webkit-transform': 'translateX(' + value + 'px)',
-      transform: 'translateX(' + value + 'px)'
-    })
-  }
+  this.$innerImageRoll.css({
+    '-webkit-transform': 'translateX(' + value + 'px)',
+    transform: 'translateX(' + value + 'px)'
+  })
 };
 
 ProductsPage.prototype.getImageAmounts = function () {
@@ -2796,7 +2808,9 @@ ProductsPage.prototype.fadeToToggle = function ($element, boolean) {
 };
 
 ProductsPage.prototype.fadeToHidden = function ($element) {
+  console.log("fading to hidden", $element);
   $element.addClass('hiding').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (f) {
+    console.log("on animation end...");
     $element.addClass('hidden');
 
     // Make sure event is only triggered once.
@@ -2816,21 +2830,16 @@ ProductsPage.prototype.initGoHomeButtons = function ($buttons) {
 };
 
 ProductsPage.prototype.initFilterButtons = function () {
-  var self = this;
+  $('.filter-series button.filter').click(function () {
 
-  $('.filter-series button')
-    .on('touchstart', function () {
-      $(this).addClass('no-hover');
-    }).click(function () {
-
+    console.log("clicked ", $(this));
     // Remove all active classes for buttons
-    $('.filter-series button').each(function () {
+    $('.filter-series button.filter').each(function () {
       $(this).removeClass('active');
     });
 
     // Add active state to this button
     $(this).addClass('active');
-    $(this).removeClass('no-hover');
   });
 };
 
@@ -2838,7 +2847,7 @@ ProductsPage.prototype.initImageButtons = function () {
   var self = this;
   $('.products-display .mix').each(function () {
     $(this).click(function () {
-      var beerIndex = $(this).attr('data-my-order');
+      var beerIndex = $(this).index() + 1;
       self.$productsList.addClass('has-moved');
       if (beerIndex === 0) {
         self.$productsList.removeClass('has-moved');
@@ -2910,9 +2919,9 @@ module.exports = ProductsPage;
 },{"jquery":13}],9:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,287,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"mix products-");_.b(_.v(_.f("category-name",c,p,0)));_.b(" img-product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\" data-my-order=\"");_.b(_.v(_.f("order",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"loader-container\">");_.b("\n" + i);_.b("      <div class=\"loader\"></div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <img src=\"images/flasks/");_.b(_.v(_.f("flask-file",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("    <div class=\"overlay\"></div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
 },{"hogan.js/lib/template":12}],10:[function(require,module,exports){
-var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1192,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner\">");_.b("\n" + i);_.b("      <div class=\"product-info\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1297,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner mdl-grid\">");_.b("\n" + i);_.b("      <div class=\"product-info mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
 },{"hogan.js/lib/template":12}],11:[function(require,module,exports){
-var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<div class=\"products-list\">");_.b("\n" + i);_.b("  <div class=\"products-display\">");_.b("\n" + i);_.b("    <div class=\"controls-filter\">");_.b("\n" + i);_.b("      <div class=\"filter-series\">");_.b("\n" + i);_.b("        <button class=\"filter button-all selected\" data-filter=\"all\">ALL</button>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,232,373,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("          <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n");});c.pop();}_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <div class=\"products-display-inner\">");_.b("\n" + i);_.b("      <div class=\"products-image-roll\">");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-inner\">");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,710,750,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("image-roll",c,p,"            "));});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,827,854,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("product-pages",c,p,"    "));});c.pop();}_.b("</div>");_.b("\n");return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<div class=\"products-list\">");_.b("\n" + i);_.b("  <div class=\"products-display\">");_.b("\n" + i);_.b("    <div class=\"controls-filter\">");_.b("\n" + i);_.b("      <div class=\"filter-series mdl-grid\">");_.b("\n" + i);_.b("        <div class=\"mdl-cell mdl-cell--12-cola mdl-cell--hide-phone mdl-cell--hide-tablet\">");_.b("\n" + i);_.b("          <button class=\"filter button-all active\" data-filter=\"all\">ALL</button>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,335,480,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("            <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n");});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"mdl-cell mdl-cell--hide-desktop\">");_.b("\n" + i);_.b("          <!-- Right aligned menu below button -->");_.b("\n" + i);_.b("          <button id=\"filters-menu-button\" class=\"mdl-button mdl-js-button mdl-button--icon\">");_.b("\n" + i);_.b("            <i class=\"material-icons\">more_vert</i>");_.b("\n" + i);_.b("          </button>");_.b("\n" + i);_.b("          <ul class=\"graff-background filter-menu mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect\"");_.b("\n" + i);_.b("              for=\"filters-menu-button\">");_.b("\n" + i);_.b("            <li class=\"filter selected mdl-menu__item\" data-filter=\"all\"><button class=\"filter button-all active\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">ALL</button></li>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1136,1398,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("              <li class=\"mdl-menu__item filter\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("                <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n" + i);_.b("              </li>");_.b("\n");});c.pop();}_.b("          </ul>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <div class=\"products-display-inner\">");_.b("\n" + i);_.b("      <div class=\"products-image-roll\">");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-inner\">");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1766,1806,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("image-roll",c,p,"            "));});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1883,1910,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("product-pages",c,p,"    "));});c.pop();}_.b("</div>");_.b("\n");return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
 },{"hogan.js/lib/template":12}],12:[function(require,module,exports){
 /*
  *  Copyright 2011 Twitter, Inc.

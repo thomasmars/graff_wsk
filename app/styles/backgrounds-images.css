@@ -1,17 +1,25 @@
-.img-home,
-.img-contact,
-.img-products {
+.img-backgrounds {
   position: relative;
   width: 100%;
   height: auto;
 }
 
+.img-backgrounds.vertical-fit {
+  height: 100%;
+  width: auto;
+}
+
 .img-home {
-  top: 20%;
+  top: 50%;
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+
+.mdl-layout:not(.is-small-screen) .img-home {
+  margin-top: -25vh;
+}
+
 
 .img-contact {
   position: relative;
