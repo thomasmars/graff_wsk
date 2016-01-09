@@ -9,7 +9,7 @@
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-
+  console.log("this ? ", this);
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
   var imageRoll = require('../templates/image-roll.mustache');
@@ -32,13 +32,22 @@
           // Init
           self.resourceLoader = new ResourceLoader();
           self.resourceLoader.resizeBackgroundImages();
+          self.resourceLoader.initMiniLightBox();
           var productsPage = new ProductsPage(view);
-          new SlideControls($wrapper);
+          var slideControls = new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
           new ContactPage();
 
           // Resize products page
-          productsPage.orientationResize();
+          productsPage.detectOrientation();
+          $(window).on('orientationchange', function () {
+            console.log("orientationchange");
+            var $scrollElement = slideControls.findClosestScrollTarget();
+            setTimeout(function () {
+              slideControls.scrollToElement($scrollElement, true);
+            }, 100);
+            productsPage.toggleOrientation();
+          });
 
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
@@ -50,7 +59,7 @@
     if (self.resourceLoader) {
       self.resourceLoader.resizeBackgroundImages();
     }
-  })
+  });
 
   $('.footer').on('touchstart', function (event) {
     event.preventDefault();

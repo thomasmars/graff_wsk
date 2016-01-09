@@ -17,4 +17,7 @@
   transform: translateX(-50%);
   width: 70%;
   height: 100%;
+
+  -webkit-transition: background-color 0.8s ease-in;
+  transition: background-color 0.8s ease-in;
 }

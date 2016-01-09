@@ -16,7 +16,6 @@ var ProductsPage = function (beerData) {
   this.clonesLoaded = false;
 
   this.placeProductPages();
-  this.initFilterButtons();
   this.initImageButtons();
   this.initProductsButtons();
 
@@ -64,8 +63,10 @@ var ProductsPage = function (beerData) {
     self.fadeToToggle(self.$imageRollArrowRight, (self.currentImageRollIndex + self.getImageAmounts() >= self.rollElements));
   });
 
-  $('body').on('changed-slide', function () {
+  $('body').on('changedSlide', function () {
+    console.log("got changedSlide!");
     self.removeFooterColor();
+    self.goHome();
   });
 
   $('.products').on('touchstart', function () {
@@ -79,25 +80,34 @@ ProductsPage.prototype.placeProductPages = function () {
   });
 };
 
-ProductsPage.prototype.orientationResize = function () {
-  var self = this;
+ProductsPage.prototype.detectOrientation = function () {
+  console.log("orientation resize!");
   var ratio = $(window).width() / $(window).height();
-  var $productsDisplay = $('.products-display');
-  var $body = $('body');
+  console.log("window dim", $(window).width(), $(window).height());
+  console.log("ratio =??", ratio);
 
-  // Landscape
-  if (ratio > 1) {
-    $body.removeClass('portrait');
-    self.resizeWrapper($productsDisplay);
-    self.isPortrait = false;
-  } else { // Portrait
-    self.isPortrait = true;
-    $body.addClass('portrait');
+  this.portrait = ratio < 1;
+  console.log("is portrait ?", this.portrait);
+  $('body').toggleClass('portrait', this.portrait);
+};
+
+ProductsPage.prototype.toggleOrientation = function () {
+  var $body = $('body');
+  var $productsDisplay = $('.products-display');
+
+  // Was portrait
+  if (this.isPortrait) {
+    this.resizeWrapper($productsDisplay);
+  } else {
     $body.trigger('reset-image-roll');
-    self.portraitResize($productsDisplay);
+    this.portraitResize($productsDisplay);
   }
 
-  self.resizeProductRoll();
+  // Set new state
+  this.isPortrait = !this.isPortrait;
+  console.log("new state", this.isPortrait);
+  $body.toggleClass('portrait', this.isPortrait);
+  this.resizeProductRoll();
 };
 
 ProductsPage.prototype.portraitResize = function ($productsDisplay) {
@@ -332,20 +342,6 @@ ProductsPage.prototype.initGoHomeButtons = function ($buttons) {
   var self = this;
   $buttons.click(function () {
     self.goHome();
-  });
-};
-
-ProductsPage.prototype.initFilterButtons = function () {
-  $('.filter-series button.filter').click(function () {
-
-    console.log("clicked ", $(this));
-    // Remove all active classes for buttons
-    $('.filter-series button.filter').each(function () {
-      $(this).removeClass('active');
-    });
-
-    // Add active state to this button
-    $(this).addClass('active');
   });
 };
 

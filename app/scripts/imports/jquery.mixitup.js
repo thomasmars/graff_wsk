@@ -504,7 +504,7 @@
 				}
 
 				if(type === 'filter') {
-					var filter = $button.attr('data-filter'),
+          var filter = $button.attr('data-filter'),
 						ndx,
 						seperator = self.controls.toggleLogic === 'or' ? ',' : '';
 

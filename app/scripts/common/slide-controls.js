@@ -3,7 +3,6 @@
  */
 var $ = require('jquery');
 var SlideControls = function ($wrapper) {
-  console.log("wrapper ?", $wrapper);
   this.$wrapper = $wrapper;
   this.initScrollToElementAnchors();
   this.addScrollToClosestElementListener();
@@ -14,15 +13,15 @@ var SlideControls = function ($wrapper) {
  */
 SlideControls.prototype.addScrollToClosestElementListener = function () {
   var self = this;
-  this.$wrapper.scroll(function () {
+  this.$wrapper.scroll(function (e) {
 
     // Auto scrolling is performed
     clearTimeout(self.scrollTimer);
     if (self.autoScrolling) {
-      return;
+      e.preventDefault();
+      return false;
     }
     self.scrollTimer = setTimeout(function () {
-      console.log(self.$wrapper.scrollTop());
       self.scrollToClosestTarget();
     }, 500);
   });
@@ -33,17 +32,19 @@ SlideControls.prototype.addScrollToClosestElementListener = function () {
  */
 SlideControls.prototype.scrollToClosestTarget = function () {
   var $targets = this.$wrapper.children();
-  var $closest = findClosestScrollTarget($targets, this.$wrapper);
+  var $closest = this.findClosestScrollTarget($targets, this.$wrapper);
   this.scrollToElement($closest);
 };
 
 /**
  * Find closest scroll target from current scroll
- * @param {jQuery} $targets
- * @param {number} currentScroll
+ * @param {jQuery} [$targets]
+ * @param {jQuery} [$wrapper]
  * @returns {jQuery} $closest
  */
-var findClosestScrollTarget = function ($targets, $wrapper) {
+SlideControls.prototype.findClosestScrollTarget = function ($targets, $wrapper) {
+  $targets = $targets || this.$wrapper.children();
+  $wrapper = $wrapper || this.$wrapper;
   var $closest = $targets.get(0);
   var closestDiff;
 
@@ -51,7 +52,7 @@ var findClosestScrollTarget = function ($targets, $wrapper) {
     var targetDiff = Math.abs($(this).offset().top - $wrapper.offset().top);
 
     // Set current diff
-    if (!closestDiff) {
+    if (closestDiff === undefined) {
       $closest = $(this);
       closestDiff = targetDiff;
     }
@@ -59,7 +60,6 @@ var findClosestScrollTarget = function ($targets, $wrapper) {
       $closest = $(this);
       closestDiff = targetDiff;
     }
-
   });
 
   return $closest;
@@ -78,14 +78,15 @@ SlideControls.prototype.slide = function (slideUp) {
   if ($nextPage) {
     this.scrollToElement($nextPage);
   }
-  $('body').trigger('changed-slide');
+  $('body').trigger('changedSlide');
 };
 
 /**
  * Scroll to element
  * @param {jQuery} $element
+ * @param {boolean} [instantScroll] Scroll instantly, no delays
  */
-SlideControls.prototype.scrollToElement = function ($element) {
+SlideControls.prototype.scrollToElement = function ($element, instantScroll) {
   var self = this;
   this.$wrapper.children().removeClass('active');
   var currentScroll = this.$wrapper.scrollTop();
@@ -95,9 +96,13 @@ SlideControls.prototype.scrollToElement = function ($element) {
     .animate({
       scrollTop: scrollTo
     }, {
-      duration: 500,
+      duration: instantScroll ? 0 : 500,
       complete: function () {
         setTimeout(function () {
+          if (!self.currentScrollElement || self.currentScrollElement.get(0) !== $element.get(0)) {
+            $('body').trigger('changedSlide');
+            self.currentScrollElement = $element;
+          }
           self.autoScrolling = false;
         }, 100);
       }

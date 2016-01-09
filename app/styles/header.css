@@ -27,15 +27,6 @@
   border-right: 1px solid black;
 }
 
-.waterfall-header {
-  height: 25vh;
-}
-
-.header-logo {
-  height:100%;
-  margin: auto;
-}
-
 .header-complete {
   background: #FAF6E2;
 }

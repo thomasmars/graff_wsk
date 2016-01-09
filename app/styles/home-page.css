@@ -1,0 +1,20 @@
+.header-logo-container {
+  height: 30vh;
+  margin: 0;
+}
+
+.header-logo {
+  display: block;
+  height:100%;
+  margin: auto;
+}
+
+.img-home-container {
+  height: calc(100% - 30vh);
+  margin: 0;
+  overflow: hidden;
+}
+
+.is-small-screen .img-home-container {
+  height: 100%;
+}

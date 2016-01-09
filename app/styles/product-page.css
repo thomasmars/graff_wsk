@@ -1,4 +1,6 @@
 .products-pages {
+  display: flex;
+  align-items: center;
   position: absolute;
   top: 0;
   left: 100%;
@@ -20,7 +22,6 @@
 .products-pages-inner {
   max-width: 1000px;
   padding-bottom: 2.5em;
-  height: 100%;
   box-sizing: border-box;
 }
 
@@ -68,6 +69,11 @@
   margin: 0;
 }
 
+.is-small-screen .product-title {
+  font-size: 31px;
+  line-height: 32px;
+}
+
 .products-pages .info-field {
   padding: 1.5em;
   border: 1px solid black;
@@ -103,10 +109,6 @@
   margin-right: 1.5em;
 }
 
-.products-pages .info-entry .entry-value {
-
-}
-
 .products-pages .product-images img {
   max-width: 100%;
   border: 1px solid black;
@@ -116,4 +118,12 @@
 
 .is-small-screen .product-images img {
   max-height: 40vh;
+}
+
+.lightbox-button {
+  text-align: center;
+}
+
+.lightbox-button-image {
+  max-height: 10em;
 }

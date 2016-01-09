@@ -10,7 +10,7 @@
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-
+  console.log("this ? ", this);
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
   var imageRoll = require('../templates/image-roll.mustache');
@@ -33,13 +33,22 @@
           // Init
           self.resourceLoader = new ResourceLoader();
           self.resourceLoader.resizeBackgroundImages();
+          self.resourceLoader.initMiniLightBox();
           var productsPage = new ProductsPage(view);
-          new SlideControls($wrapper);
+          var slideControls = new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
           new ContactPage();
 
           // Resize products page
-          productsPage.orientationResize();
+          productsPage.detectOrientation();
+          $(window).on('orientationchange', function () {
+            console.log("orientationchange");
+            var $scrollElement = slideControls.findClosestScrollTarget();
+            setTimeout(function () {
+              slideControls.scrollToElement($scrollElement, true);
+            }, 100);
+            productsPage.toggleOrientation();
+          });
 
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
@@ -51,7 +60,7 @@
     if (self.resourceLoader) {
       self.resourceLoader.resizeBackgroundImages();
     }
-  })
+  });
 
   $('.footer').on('touchstart', function (event) {
     event.preventDefault();
@@ -106,11 +115,34 @@ var $ = require('jquery');
  * Init mix it up library
  */
 var initMixItUp = function () {
-  $('.products-display').mixItUp({
-    animation: {
-      effects: 'fade'
+  var loaded = 0;
+  var $mixItUpImages = $('.mix > img');
+  var imagesToLoad = $mixItUpImages.length;
+
+  // Wait for images to load
+  $mixItUpImages.one('load', function () {
+    // Image loaded
+    loaded += 1;
+
+    // Check if all images are loaded
+    if (loaded >= imagesToLoad) {
+
+      // Apply mixItUp to container
+      $('.products-display').mixItUp({
+        animation: {
+          effects: 'fade'
+        }
+      });
     }
-  });
+
+  }).each(function () {
+
+    // Make sure loaded is run for cached images.
+    if (this.complete) {
+      $(this).load();
+    }
+  })
+
 };
 
 var ResourceLoader = function () {
@@ -123,14 +155,20 @@ var ResourceLoader = function () {
     $backgroundImages.each(function () {
 
       // Fit to height
-      if ($(this).height() < $(this).parent().height()) {
+      if ($(this).height() < $('main').height()) {
         $(this).addClass('vertical-fit');
       } // Fit to width
-      else if ($(this).width() < $(this).parent().width()) {
+      else if ($(this).width() < $('main').width()) {
         $(this).removeClass('vertical-fit');
       }
     });
-  }
+  };
+
+  self.initMiniLightBox = function () {
+    $('.lightbox-button-image').each(function () {
+      //($(this).get(0));
+    })
+  };
 };
 
 module.exports = ResourceLoader;
@@ -141,7 +179,6 @@ module.exports = ResourceLoader;
  */
 var $ = require('jquery');
 var SlideControls = function ($wrapper) {
-  console.log("wrapper ?", $wrapper);
   this.$wrapper = $wrapper;
   this.initScrollToElementAnchors();
   this.addScrollToClosestElementListener();
@@ -152,15 +189,15 @@ var SlideControls = function ($wrapper) {
  */
 SlideControls.prototype.addScrollToClosestElementListener = function () {
   var self = this;
-  this.$wrapper.scroll(function () {
+  this.$wrapper.scroll(function (e) {
 
     // Auto scrolling is performed
     clearTimeout(self.scrollTimer);
     if (self.autoScrolling) {
-      return;
+      e.preventDefault();
+      return false;
     }
     self.scrollTimer = setTimeout(function () {
-      console.log(self.$wrapper.scrollTop());
       self.scrollToClosestTarget();
     }, 500);
   });
@@ -171,17 +208,19 @@ SlideControls.prototype.addScrollToClosestElementListener = function () {
  */
 SlideControls.prototype.scrollToClosestTarget = function () {
   var $targets = this.$wrapper.children();
-  var $closest = findClosestScrollTarget($targets, this.$wrapper);
+  var $closest = this.findClosestScrollTarget($targets, this.$wrapper);
   this.scrollToElement($closest);
 };
 
 /**
  * Find closest scroll target from current scroll
- * @param {jQuery} $targets
- * @param {number} currentScroll
+ * @param {jQuery} [$targets]
+ * @param {jQuery} [$wrapper]
  * @returns {jQuery} $closest
  */
-var findClosestScrollTarget = function ($targets, $wrapper) {
+SlideControls.prototype.findClosestScrollTarget = function ($targets, $wrapper) {
+  $targets = $targets || this.$wrapper.children();
+  $wrapper = $wrapper || this.$wrapper;
   var $closest = $targets.get(0);
   var closestDiff;
 
@@ -189,7 +228,7 @@ var findClosestScrollTarget = function ($targets, $wrapper) {
     var targetDiff = Math.abs($(this).offset().top - $wrapper.offset().top);
 
     // Set current diff
-    if (!closestDiff) {
+    if (closestDiff === undefined) {
       $closest = $(this);
       closestDiff = targetDiff;
     }
@@ -197,7 +236,6 @@ var findClosestScrollTarget = function ($targets, $wrapper) {
       $closest = $(this);
       closestDiff = targetDiff;
     }
-
   });
 
   return $closest;
@@ -216,14 +254,15 @@ SlideControls.prototype.slide = function (slideUp) {
   if ($nextPage) {
     this.scrollToElement($nextPage);
   }
-  $('body').trigger('changed-slide');
+  $('body').trigger('changedSlide');
 };
 
 /**
  * Scroll to element
  * @param {jQuery} $element
+ * @param {boolean} [instantScroll] Scroll instantly, no delays
  */
-SlideControls.prototype.scrollToElement = function ($element) {
+SlideControls.prototype.scrollToElement = function ($element, instantScroll) {
   var self = this;
   this.$wrapper.children().removeClass('active');
   var currentScroll = this.$wrapper.scrollTop();
@@ -233,9 +272,13 @@ SlideControls.prototype.scrollToElement = function ($element) {
     .animate({
       scrollTop: scrollTo
     }, {
-      duration: 500,
+      duration: instantScroll ? 0 : 500,
       complete: function () {
         setTimeout(function () {
+          if (!self.currentScrollElement || self.currentScrollElement.get(0) !== $element.get(0)) {
+            $('body').trigger('changedSlide');
+            self.currentScrollElement = $element;
+          }
           self.autoScrolling = false;
         }, 100);
       }
@@ -762,7 +805,7 @@ module.exports = SlideControls;
 				}
 
 				if(type === 'filter') {
-					var filter = $button.attr('data-filter'),
+          var filter = $button.attr('data-filter'),
 						ndx,
 						seperator = self.controls.toggleLogic === 'or' ? ',' : '';
 
@@ -2510,7 +2553,6 @@ var ProductsPage = function (beerData) {
   this.clonesLoaded = false;
 
   this.placeProductPages();
-  this.initFilterButtons();
   this.initImageButtons();
   this.initProductsButtons();
 
@@ -2558,8 +2600,10 @@ var ProductsPage = function (beerData) {
     self.fadeToToggle(self.$imageRollArrowRight, (self.currentImageRollIndex + self.getImageAmounts() >= self.rollElements));
   });
 
-  $('body').on('changed-slide', function () {
+  $('body').on('changedSlide', function () {
+    console.log("got changedSlide!");
     self.removeFooterColor();
+    self.goHome();
   });
 
   $('.products').on('touchstart', function () {
@@ -2573,25 +2617,34 @@ ProductsPage.prototype.placeProductPages = function () {
   });
 };
 
-ProductsPage.prototype.orientationResize = function () {
-  var self = this;
+ProductsPage.prototype.detectOrientation = function () {
+  console.log("orientation resize!");
   var ratio = $(window).width() / $(window).height();
-  var $productsDisplay = $('.products-display');
-  var $body = $('body');
+  console.log("window dim", $(window).width(), $(window).height());
+  console.log("ratio =??", ratio);
 
-  // Landscape
-  if (ratio > 1) {
-    $body.removeClass('portrait');
-    self.resizeWrapper($productsDisplay);
-    self.isPortrait = false;
-  } else { // Portrait
-    self.isPortrait = true;
-    $body.addClass('portrait');
+  this.portrait = ratio < 1;
+  console.log("is portrait ?", this.portrait);
+  $('body').toggleClass('portrait', this.portrait);
+};
+
+ProductsPage.prototype.toggleOrientation = function () {
+  var $body = $('body');
+  var $productsDisplay = $('.products-display');
+
+  // Was portrait
+  if (this.isPortrait) {
+    this.resizeWrapper($productsDisplay);
+  } else {
     $body.trigger('reset-image-roll');
-    self.portraitResize($productsDisplay);
+    this.portraitResize($productsDisplay);
   }
 
-  self.resizeProductRoll();
+  // Set new state
+  this.isPortrait = !this.isPortrait;
+  console.log("new state", this.isPortrait);
+  $body.toggleClass('portrait', this.isPortrait);
+  this.resizeProductRoll();
 };
 
 ProductsPage.prototype.portraitResize = function ($productsDisplay) {
@@ -2829,20 +2882,6 @@ ProductsPage.prototype.initGoHomeButtons = function ($buttons) {
   });
 };
 
-ProductsPage.prototype.initFilterButtons = function () {
-  $('.filter-series button.filter').click(function () {
-
-    console.log("clicked ", $(this));
-    // Remove all active classes for buttons
-    $('.filter-series button.filter').each(function () {
-      $(this).removeClass('active');
-    });
-
-    // Add active state to this button
-    $(this).addClass('active');
-  });
-};
-
 ProductsPage.prototype.initImageButtons = function () {
   var self = this;
   $('.products-display .mix').each(function () {
@@ -2919,7 +2958,7 @@ module.exports = ProductsPage;
 },{"jquery":13}],9:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,287,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"mix products-");_.b(_.v(_.f("category-name",c,p,0)));_.b(" img-product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\" data-my-order=\"");_.b(_.v(_.f("order",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"loader-container\">");_.b("\n" + i);_.b("      <div class=\"loader\"></div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <img src=\"images/flasks/");_.b(_.v(_.f("flask-file",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("    <div class=\"overlay\"></div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
 },{"hogan.js/lib/template":12}],10:[function(require,module,exports){
-var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1297,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner mdl-grid\">");_.b("\n" + i);_.b("      <div class=\"product-info mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
+var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1595,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner mdl-grid\">");_.b("\n" + i);_.b("      <div class=\"product-info mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images mdl-cell mdl-cell--hide-tablet mdl-cell--hide-phone mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"lightbox-button mdl-cell mdl-cell--hide-desktop\">");_.b("\n" + i);_.b("        <img class=\"lightbox-button-image\" src=\"images/etiketter/button/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b("-button.png\" data-image-opened=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
 },{"hogan.js/lib/template":12}],11:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<div class=\"products-list\">");_.b("\n" + i);_.b("  <div class=\"products-display\">");_.b("\n" + i);_.b("    <div class=\"controls-filter\">");_.b("\n" + i);_.b("      <div class=\"filter-series mdl-grid\">");_.b("\n" + i);_.b("        <div class=\"mdl-cell mdl-cell--12-cola mdl-cell--hide-phone mdl-cell--hide-tablet\">");_.b("\n" + i);_.b("          <button class=\"filter button-all active\" data-filter=\"all\">ALL</button>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,335,480,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("            <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n");});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"mdl-cell mdl-cell--hide-desktop\">");_.b("\n" + i);_.b("          <!-- Right aligned menu below button -->");_.b("\n" + i);_.b("          <button id=\"filters-menu-button\" class=\"mdl-button mdl-js-button mdl-button--icon\">");_.b("\n" + i);_.b("            <i class=\"material-icons\">more_vert</i>");_.b("\n" + i);_.b("          </button>");_.b("\n" + i);_.b("          <ul class=\"graff-background filter-menu mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect\"");_.b("\n" + i);_.b("              for=\"filters-menu-button\">");_.b("\n" + i);_.b("            <li class=\"filter selected mdl-menu__item\" data-filter=\"all\"><button class=\"filter button-all active\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">ALL</button></li>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1136,1398,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("              <li class=\"mdl-menu__item filter\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("                <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n" + i);_.b("              </li>");_.b("\n");});c.pop();}_.b("          </ul>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <div class=\"products-display-inner\">");_.b("\n" + i);_.b("      <div class=\"products-image-roll\">");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-inner\">");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1766,1806,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("image-roll",c,p,"            "));});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1883,1910,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("product-pages",c,p,"    "));});c.pop();}_.b("</div>");_.b("\n");return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
 },{"hogan.js/lib/template":12}],12:[function(require,module,exports){

@@ -25,11 +25,11 @@ body {
 
 .wrapper {
   background: #FAF6E2;
+  height: calc(100vh - 64px);
 }
 
-body .footer-inner {
-  -webkit-transition: background-color 0.8s ease-out;
-  transition: background-color 0.8s ease-out;
+.is-small-screen .wrapper {
+  height: calc(100vh - 56px);
 }
 
 /* Color schemes */

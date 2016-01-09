@@ -1,15 +1,12 @@
 .main-page {
   position: relative;
   overflow: hidden;
-  height: 100vh;
+  height: 100%;
   width: 100%;
   box-sizing: border-box;
   padding: 0;
 }
 
-.home {
-  height: calc(100vh - 4.5em);
-}
 .products {
   background: #FAF6E2;
 }

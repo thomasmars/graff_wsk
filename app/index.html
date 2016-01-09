@@ -18,7 +18,7 @@
     <meta name="theme-color" content="#2F3BA2">
 
     <!-- Material Design Lite page styles -->
-    <link rel="stylesheet" href="./../node_modules/material-design-lite/material.min.css" />
+    <link rel="stylesheet" href="./external/material.min.css" />
 
     <!-- Material Design icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -41,9 +41,6 @@
             <img class="small-logo" src="images/logo-simple.png">
           </div>
         </div>
-        <div class="mdl-layout__header-row waterfall-header mdl-layout--large-screen-only">
-          <img class="header-logo" src="./images/logo.png" />
-        </div>
       </header>
       <div class="mdl-layout__drawer mdl-layout--small-screen-only">
         <img class="drawer-logo" src="images/cropped-logo.png">
@@ -55,7 +52,12 @@
       </div>
       <main class="mdl-layout__content wrapper">
         <div class="main-page home mdl-grid--no-spacing" id="home">
-          <img class="mdl-cell--stretch img-home img-backgrounds" src="images/eske-xs.jpg">
+          <div class="mdl-cell mdl-cell--12-col mdl-cell--hide-tablet mdl-cell--hide-phone header-logo-container">
+            <img class="header-logo" src="./images/logo.png" />
+          </div>
+          <div class="mdl-cell mdl-cell--12-col img-home-container">
+            <img class="img-home img-backgrounds" src="images/eske-xs.jpg">
+          </div>
         </div>
         <div class="main-page products mdl-grid" id="products"></div>
         <div class="main-page contact" id="contact">
@@ -88,8 +90,11 @@
         </div>
       </main>
     </div>
+    <div class="footer">
+      <div class="footer-inner"></div>
+    </div>
 
-    <script src="./../node_modules/material-design-lite/material.min.js"></script>
+    <script src="./external/material.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtNRjBxS2k_MywbRKdrgM8edIx8DSeapA&libraries=places"></script>
     <script src="build/bundle.js"></script>
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
