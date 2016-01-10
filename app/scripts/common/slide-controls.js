@@ -29,11 +29,17 @@ SlideControls.prototype.addScrollToClosestElementListener = function () {
 
 /**
  * Add scroll listener to slide to closest slide.
+ * @param {number} [timeout] Timeout in ms before scrolling.
  */
-SlideControls.prototype.scrollToClosestTarget = function () {
-  var $targets = this.$wrapper.children();
-  var $closest = this.findClosestScrollTarget($targets, this.$wrapper);
-  this.scrollToElement($closest);
+SlideControls.prototype.scrollToClosestTarget = function (timeout) {
+  var $closest = this.findClosestScrollTarget();
+
+  if (timeout) {
+    setTimeout(() => this.scrollToElement($closest), timeout);
+  }
+  else {
+    this.scrollToElement($closest);
+  }
 };
 
 /**

@@ -28,8 +28,10 @@ body {
   height: calc(100vh - 64px);
 }
 
-.is-small-screen .wrapper {
-  height: calc(100vh - 56px);
+@media (max-width: 839px) {
+  .wrapper {
+    height: calc(100vh - 56px);
+  }
 }
 
 /* Color schemes */

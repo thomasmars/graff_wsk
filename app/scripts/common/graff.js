@@ -9,7 +9,8 @@
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-  console.log("this ? ", this);
+  require('../imports/mini-lightbox');
+
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
   var imageRoll = require('../templates/image-roll.mustache');
@@ -30,35 +31,29 @@
         .then(function () {
 
           // Init
-          self.resourceLoader = new ResourceLoader();
-          self.resourceLoader.resizeBackgroundImages();
-          self.resourceLoader.initMiniLightBox();
+          var resourceLoader = new ResourceLoader();
+          resourceLoader.resizeBackgroundImages();
+          //resourceLoader.initMiniLightBox(MiniLightBox);
+          var $lightboxButton = $('.lightbox-button-image');
+          window.MiniLightbox($lightboxButton);
           var productsPage = new ProductsPage(view);
           var slideControls = new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
           new ContactPage();
 
           // Resize products page
-          productsPage.detectOrientation();
-          $(window).on('orientationchange', function () {
-            console.log("orientationchange");
-            var $scrollElement = slideControls.findClosestScrollTarget();
-            setTimeout(function () {
-              slideControls.scrollToElement($scrollElement, true);
-            }, 100);
-            productsPage.toggleOrientation();
+          $(window).resize(function () {
+            resourceLoader.resizeBackgroundImages();
+            productsPage.detectOrientation();
+            productsPage.resizeWrapper();
+            slideControls.scrollToClosestTarget(100);
           });
+          $(window).resize();
 
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
         });
     });
-  });
-
-  $(window).resize(function () {
-    if (self.resourceLoader) {
-      self.resourceLoader.resizeBackgroundImages();
-    }
   });
 
   $('.footer').on('touchstart', function (event) {

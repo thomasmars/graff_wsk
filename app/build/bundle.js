@@ -10,7 +10,8 @@
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-  console.log("this ? ", this);
+  require('../imports/mini-lightbox');
+
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
   var imageRoll = require('../templates/image-roll.mustache');
@@ -31,35 +32,29 @@
         .then(function () {
 
           // Init
-          self.resourceLoader = new ResourceLoader();
-          self.resourceLoader.resizeBackgroundImages();
-          self.resourceLoader.initMiniLightBox();
+          var resourceLoader = new ResourceLoader();
+          resourceLoader.resizeBackgroundImages();
+          //resourceLoader.initMiniLightBox(MiniLightBox);
+          var $lightboxButton = $('.lightbox-button-image');
+          window.MiniLightbox($lightboxButton);
           var productsPage = new ProductsPage(view);
           var slideControls = new SlideControls($wrapper);
           new GraffHeader($wrapper, productsPage);
           new ContactPage();
 
           // Resize products page
-          productsPage.detectOrientation();
-          $(window).on('orientationchange', function () {
-            console.log("orientationchange");
-            var $scrollElement = slideControls.findClosestScrollTarget();
-            setTimeout(function () {
-              slideControls.scrollToElement($scrollElement, true);
-            }, 100);
-            productsPage.toggleOrientation();
+          $(window).resize(function () {
+            resourceLoader.resizeBackgroundImages();
+            productsPage.detectOrientation();
+            productsPage.resizeWrapper();
+            slideControls.scrollToClosestTarget(100);
           });
+          $(window).resize();
 
           // Finally load clones to create 'product roll'
           productsPage.loadClones();
         });
     });
-  });
-
-  $(window).resize(function () {
-    if (self.resourceLoader) {
-      self.resourceLoader.resizeBackgroundImages();
-    }
   });
 
   $('.footer').on('touchstart', function (event) {
@@ -68,7 +63,7 @@
 
 })();
 
-},{"../pages/contact-page":7,"../pages/products-page":8,"../templates/image-roll.mustache":9,"../templates/product-pages.mustache":10,"../templates/products-main.mustache":11,"./header":2,"./resource-loader":3,"./slide-controls":4,"jquery":13}],2:[function(require,module,exports){
+},{"../imports/mini-lightbox":6,"../pages/contact-page":8,"../pages/products-page":9,"../templates/image-roll.mustache":10,"../templates/product-pages.mustache":11,"../templates/products-main.mustache":12,"./header":2,"./resource-loader":3,"./slide-controls":4,"jquery":14}],2:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
@@ -105,7 +100,7 @@ GraffHeader.prototype.initClickListeners = function () {
 
 module.exports = GraffHeader;
 
-},{"jquery":13}],3:[function(require,module,exports){
+},{"jquery":14}],3:[function(require,module,exports){
 /**
  * Created by thoma_000 on 17.11.2015.
  */
@@ -134,7 +129,6 @@ var initMixItUp = function () {
         }
       });
     }
-
   }).each(function () {
 
     // Make sure loaded is run for cached images.
@@ -155,16 +149,20 @@ var ResourceLoader = function () {
     $backgroundImages.each(function () {
 
       // Fit to height
-      if ($(this).height() < $('main').height()) {
+      if ($(this).height() < $(this).parent().height()) {
         $(this).addClass('vertical-fit');
       } // Fit to width
-      else if ($(this).width() < $('main').width()) {
+      else if ($(this).width() < $(this).parent().width()) {
         $(this).removeClass('vertical-fit');
       }
     });
   };
 
-  self.initMiniLightBox = function () {
+  self.initMiniLightBox = function (miniLightBox) {
+    debugger;
+    var $lightboxButton = $('lightbox-button-image');
+    console.log($lightboxButton);
+    console.log("mini light box ?", miniLightBox);
     $('.lightbox-button-image').each(function () {
       //($(this).get(0));
     })
@@ -173,7 +171,7 @@ var ResourceLoader = function () {
 
 module.exports = ResourceLoader;
 
-},{"jquery":13}],4:[function(require,module,exports){
+},{"jquery":14}],4:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
@@ -205,11 +203,17 @@ SlideControls.prototype.addScrollToClosestElementListener = function () {
 
 /**
  * Add scroll listener to slide to closest slide.
+ * @param {number} [timeout] Timeout in ms before scrolling.
  */
-SlideControls.prototype.scrollToClosestTarget = function () {
-  var $targets = this.$wrapper.children();
-  var $closest = this.findClosestScrollTarget($targets, this.$wrapper);
-  this.scrollToElement($closest);
+SlideControls.prototype.scrollToClosestTarget = function (timeout) {
+  var $closest = this.findClosestScrollTarget();
+
+  if (timeout) {
+    setTimeout(() => this.scrollToElement($closest), timeout);
+  }
+  else {
+    this.scrollToElement($closest);
+  }
 };
 
 /**
@@ -298,7 +302,7 @@ SlideControls.prototype.initScrollToElementAnchors = function () {
 
 module.exports = SlideControls;
 
-},{"jquery":13}],5:[function(require,module,exports){
+},{"jquery":14}],5:[function(require,module,exports){
 /**!
  * MixItUp v2.1.11
  *
@@ -2399,6 +2403,135 @@ module.exports = SlideControls;
 })(jQuery);
 
 },{}],6:[function(require,module,exports){
+// MiniLightbox
+// </> with <3 by Ionică Bizău
+(function (root) {
+
+  console.log("this", this);
+  console.log("root", root);
+    root.addEventListener("scroll", function () {
+        MiniLightbox.close();
+    });
+
+    root.addEventListener("keydown", function (e) {
+        if (e.which !== 27) { return; }
+        MiniLightbox.close();
+    });
+
+    function matchesSelector(selector, element) {
+        var all = document.querySelectorAll(selector);
+        for (var i = 0; i < all.length; i++) {
+            if (all[i] === element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+     function MiniLightbox(options) {
+
+        var selector = options.selector || options
+          , elms = document.querySelectorAll(selector)
+          , clickHandler = function (e) {
+                var id = this.id
+                  , fCache = cache[id]
+                  ;
+
+                if (!id) {
+                    this.setAttribute("id", id = "ml_" + Math.random().toString(36));
+                }
+
+                if (fCache) {
+                    MiniLightbox.open(id);
+                } else {
+                    var box = document.createElement("div");
+                    box.setAttribute("class", "ml_box");
+                    var img = document.createElement("img");
+                    img.setAttribute("src", this.getAttribute("data-image-opened") || this.src);
+                    box.appendChild(img);
+
+                    box.addEventListener("click", function () {
+                        MiniLightbox.close(id);
+                    });
+
+                    cache[id] = {
+                        el: this
+                      , box: box
+                      , img: img
+                      , opened: false
+                    };
+
+                    document.body.appendChild(box);
+                    MiniLightbox.open(id);
+                }
+
+                e.preventDefault();
+            }
+          ;
+
+        for (var i = 0; i < elms.length; ++i) {
+            new Image(elms[i].getAttribute("data-image-opened"));
+        }
+
+        if (options.delegation) {
+            return document.querySelector(options.delegation).addEventListener("click", function(e) {
+                var el = e.target;
+                var parents = [el];
+                while (el) { parents.push(el = el.parentNode); }
+                for (var i = 0; i < parents.length; ++i) {
+                    var cPar = parents[i];
+                    if (matchesSelector(options.selector, cPar) && (el = cPar)) {
+                        break;
+                    }
+                }
+
+                if (!el || el.tagName !== 'IMG' || el.parentNode.classList.contains("ml_box")) { return; }
+                clickHandler.call(el, e);
+            });
+        }
+
+        for (var i = 0; i < elms.length; ++i) {
+            (function (cEl) {
+                cEl.addEventListener("click", clickHandler);
+            })(elms[i]);
+        }
+    };
+
+    MiniLightbox.close = function (id) {
+        if (!id) {
+            var ids = Object.keys(cache);
+            for (var i = 0; i < ids.length; ++i) {
+                MiniLightbox.close(ids[i]);
+            }
+            return;
+        }
+        if (!cache[id].opened) {
+            return;
+        }
+        cache[id].opened = false;
+
+        if (typeof MiniLightbox.customClose === "function" && MiniLightbox.customClose.call(cache[id]) === false) {
+            return;
+        }
+
+        cache[id].box.style.display = "none";
+    };
+
+    MiniLightbox.open = function (id) {
+        if (cache[id].opened) { return; }
+        cache[id].opened = true;
+        if (typeof MiniLightbox.customOpen === "function" && MiniLightbox.customOpen.call(cache[id]) === false) {
+            return;
+        }
+        cache[id].box.style.display = "block";
+    };
+
+    var cache = MiniLightbox._cache = {};
+
+    root.MiniLightbox = MiniLightbox;
+})(window);
+
+},{}],7:[function(require,module,exports){
 (function (global){
 /*!
  *
@@ -2488,7 +2621,7 @@ module.exports = SlideControls;
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./common/graff.js":1,"./imports/jquery.mixitup.js":5,"jquery":13}],7:[function(require,module,exports){
+},{"./common/graff.js":1,"./imports/jquery.mixitup.js":5,"jquery":14}],8:[function(require,module,exports){
 /**
  * Created by thoma_000 on 01.10.2015.
  */
@@ -2534,7 +2667,7 @@ ContactPage.prototype.initGoogleMap = function () {
 module.exports = ContactPage;
 
 
-},{"jquery":13}],8:[function(require,module,exports){
+},{"jquery":14}],9:[function(require,module,exports){
 /**
  * Created by thoma_000 on 19.09.2015.
  */
@@ -2545,6 +2678,7 @@ var ProductsPage = function (beerData) {
   this.currentIndex = 0;
   this.$mixItUp = $('.products-display');
   this.$productsList = $('.products-list');
+  this.$productsPages = $('.products-pages');
   this.totalProductPages = $('.products-pages').length;
   this.$innerImageRoll = this.$productsList.find('.products-image-roll-inner');
   this.$imageRollArrowLeft = this.$productsList.find('.products-image-roll-arrow.left');
@@ -2558,15 +2692,6 @@ var ProductsPage = function (beerData) {
 
   this.beerClasses = this.getBeerClasses(beerData);
 
-  self.setMinHeightInnerRoll = function () {
-    var $innerRoll = $('.products-image-roll-inner');
-    var minSize = $innerRoll.children('.mix').height();
-
-    // Set height of inner container
-    console.log("setting min height!", minSize);
-    $innerRoll.css('min-height', minSize + 'px');
-  };
-
   setTimeout(function () {
     self.initImageRollButtons();
 
@@ -2576,15 +2701,13 @@ var ProductsPage = function (beerData) {
 
       // Unset height of inner container
       $('.products-image-roll-inner').css('height', '');
-      self.resizeProductRoll();
     });
 
     self.$mixItUp.on('mixLoad', function () {
-      self.setMinHeightInnerRoll();
+      self.resizeWrapper();
     });
 
     self.$mixItUp.on('mixStart', function () {
-      self.setMinHeightInnerRoll();
     });
 
   }, 100);
@@ -2601,14 +2724,25 @@ var ProductsPage = function (beerData) {
   });
 
   $('body').on('changedSlide', function () {
-    console.log("got changedSlide!");
     self.removeFooterColor();
     self.goHome();
   });
 
-  $('.products').on('touchstart', function () {
-    console.log("started touching");
-  });
+  // Resize product roll once all images has loaded
+  var $rollImages = this.$mixItUp.find('img');
+  var imagesToLoad = $rollImages.length;
+  var imagesLoaded = 0;
+  $rollImages.load(function () {
+    imagesLoaded += 1;
+
+    if (imagesLoaded >= imagesToLoad) {
+      self.resizeWrapper();
+    }
+  }).each(function () {
+    if (this.complete) {
+      $(this).load();
+    }
+  })
 };
 
 ProductsPage.prototype.placeProductPages = function () {
@@ -2618,61 +2752,43 @@ ProductsPage.prototype.placeProductPages = function () {
 };
 
 ProductsPage.prototype.detectOrientation = function () {
-  console.log("orientation resize!");
   var ratio = $(window).width() / $(window).height();
-  console.log("window dim", $(window).width(), $(window).height());
-  console.log("ratio =??", ratio);
 
   this.portrait = ratio < 1;
-  console.log("is portrait ?", this.portrait);
   $('body').toggleClass('portrait', this.portrait);
 };
 
 ProductsPage.prototype.toggleOrientation = function () {
   var $body = $('body');
-  var $productsDisplay = $('.products-display');
-
-  // Was portrait
-  if (this.isPortrait) {
-    this.resizeWrapper($productsDisplay);
-  } else {
-    $body.trigger('reset-image-roll');
-    this.portraitResize($productsDisplay);
-  }
 
   // Set new state
   this.isPortrait = !this.isPortrait;
-  console.log("new state", this.isPortrait);
   $body.toggleClass('portrait', this.isPortrait);
-  this.resizeProductRoll();
-};
-
-ProductsPage.prototype.portraitResize = function ($productsDisplay) {
-  var $productsDisplay = $productsDisplay || $('.products-display');
-
-  $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
-  this.imageAmounts = 3;
 };
 
 ProductsPage.prototype.resizeWrapper = function ($productsDisplay) {
   var self = this;
   var windowWidth = $(window).width();
+  var windowHeight = $(window).height();
 
-  var $productsDisplay = $productsDisplay || $('.products-display');
+  $productsDisplay = $productsDisplay || $('.products-display');
 
+  $productsDisplay.find('.mix').css('width', '');
   if (windowWidth <= 600) {
-    $productsDisplay.removeClass('three-images four-images five-images').addClass('two-images');
     self.imageAmounts = 2;
   } else if (windowWidth <= 900) {
-    $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
     self.imageAmounts = 3;
   } else if (windowWidth <= 1200) {
-    $productsDisplay.removeClass('two-images three-images five-images').addClass('four-images');
     self.imageAmounts = 4;
   } else {
-    $productsDisplay.removeClass('two-images three-images four-images').addClass('five-images');
     self.imageAmounts = 5;
   }
+  $productsDisplay.find('.mix').css('width', (100 / self.imageAmounts) + '%');
+
+
+  this.reduceProductRollHeight();
+  this.initImageRollButtons();
+  this.fitProductPagesFont();
 };
 
 ProductsPage.prototype.getBeerClasses = function (beerData) {
@@ -2688,46 +2804,33 @@ ProductsPage.prototype.getBeerClasses = function (beerData) {
   return beerArray;
 };
 
-ProductsPage.prototype.resizeProductRoll = function () {
+ProductsPage.prototype.reduceProductRollHeight = function () {
+  var self = this;
   var $productsDisplay = $('.products-display');
   var $productsList = $('.products-list');
   var $images = $productsDisplay.find('.mix');
-  var decrementPercentage = 0.5;
 
-  // Reset products display
-  $productsDisplay.removeClass('full-height');
+  if ($productsDisplay.outerHeight() > $productsList.height()) {
 
-  // Reset image height
-  $images.css('width', '');
-
-  // Reduce image size if products display is too big.
-
-  if (this.isPortrait && ($productsDisplay.outerHeight() > $productsList.height())) {
-    // Disable skewered centering since product list is taking up full height
-    $productsDisplay.addClass('full-height');
-
-
-    var reduceImageSize = function ($images, currWidth) {
-      var newWidth = currWidth - decrementPercentage;
-      console.log("reduce image size", newWidth);
-      //$images.css('width', newWidth + '%');
+    var increaseImageAmounts = function () {
+      self.imageAmounts += 1;
+      console.log("reduce image amounts");
+      console.log(self.imageAmounts);
+      $images.css('width', (100 / self.imageAmounts) + '%');
     };
 
     var imagesTooBig = true;
     var test = 0;
-    while(imagesTooBig && test < 100) {
+    while(imagesTooBig && test < 100 && self.imageAmounts < ProductsPage.maxImages) {
       $productsDisplay.addClass('disable-transitions');
-      var currWidth = $images.width() / $productsList.width() * 100;
       test += 1;
-      reduceImageSize($images, currWidth);
+      increaseImageAmounts();
       if ($productsDisplay.outerHeight() < $productsList.height()) {
         imagesTooBig = false;
       }
     }
     $productsDisplay.removeClass('disable-transitions');
   }
-
-  this.setMinHeightInnerRoll()
 };
 
 ProductsPage.prototype.loadClones = function () {
@@ -2751,6 +2854,7 @@ ProductsPage.prototype.loadClones = function () {
 
       if (clonesLoaded >= totalClones) {
         self.clonesLoaded = true;
+        self.$productsPages = $('.products-pages');
       }
     });
   });
@@ -2761,7 +2865,6 @@ ProductsPage.prototype.initProductsButtons = function () {
 };
 
 ProductsPage.prototype.initImageRollButtons = function () {
-  console.log("init image roll buttons");
   var self = this;
   var $mixElements = this.$productsList.find('.mix');
   var scrollAmount = $mixElements.get(0).offsetWidth;
@@ -2775,7 +2878,6 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowLeft.unbind('click')
     .click(function () {
-      console.log("clicked arrow left");
 
       // Already at min index
       if (self.currentImageRollIndex === 0) {
@@ -2798,26 +2900,16 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowRight.unbind('click')
     .click(function () {
-      console.log("clicked arrow right");
-
-      console.log("image roll index, ", self.currentImageRollIndex);
-      console.log("visible elements", visibleElements);
-      console.log("roll elements", rollElements);
 
       // All images already shown
       if (self.currentImageRollIndex + 1 + visibleElements > rollElements) {
         return;
       }
 
-      // Decrease current image roll index
+      // Increase current image roll index
       self.currentImageRollIndex += 1;
 
-
-      console.log("current image roll index", self.currentImageRollIndex);
-      console.log("visible elements", visibleElements);
-      console.log("roll elements", rollElements);
       if (self.currentImageRollIndex + visibleElements >= rollElements) {
-        console.log("fade to hidden ?");
         self.fadeToHidden(self.$imageRollArrowRight);
       }
       self.fadeToShown(self.$imageRollArrowLeft);
@@ -2825,7 +2917,6 @@ ProductsPage.prototype.initImageRollButtons = function () {
       // Negative translation
       scrollAmount = $mixElements.get(0).offsetWidth;
 
-      console.log("setting image roll translate");
       self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
     });
 
@@ -2835,17 +2926,40 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   // Handle visibility of buttons
   self.fadeToToggle(this.$imageRollArrowLeft, (this.currentImageRollIndex === 0));
+  console.log("current image roll index", this.currentImageRollIndex);
+  console.log("visible elements", visibleElements);
+  console.log("roll elements", rollElements);
   self.fadeToToggle(this.$imageRollArrowRight, (this.currentImageRollIndex + visibleElements >= rollElements));
   self.rollElements = rollElements;
 };
 
 ProductsPage.prototype.setImageRollTranslate = function (value) {
-  var self = this;
   value = value ? value : 0;
   this.$innerImageRoll.css({
     '-webkit-transform': 'translateX(' + value + 'px)',
     transform: 'translateX(' + value + 'px)'
   })
+};
+
+ProductsPage.prototype.fitProductPagesFont = function () {
+  var self = this;
+
+  // Reset font size
+  this.$productsPages.css('font-size', '');
+  var currentFontSize = parseFloat(this.$productsPages.css('font-size'));
+
+
+  if (this.$productsPages.children('.products-pages-inner').outerHeight() > this.$productsPages.height()) {
+
+    var reduceFontSize = function () {
+      currentFontSize -= ProductsPage.fontSizeDecrementStep;
+      self.$productsPages.css('font-size', currentFontSize + 'px');
+    };
+
+    while(this.$productsPages.children('.products-pages-inner').outerHeight() > this.$productsPages.height()) {
+      reduceFontSize();
+    }
+  }
 };
 
 ProductsPage.prototype.getImageAmounts = function () {
@@ -2861,9 +2975,7 @@ ProductsPage.prototype.fadeToToggle = function ($element, boolean) {
 };
 
 ProductsPage.prototype.fadeToHidden = function ($element) {
-  console.log("fading to hidden", $element);
   $element.addClass('hiding').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (f) {
-    console.log("on animation end...");
     $element.addClass('hidden');
 
     // Make sure event is only triggered once.
@@ -2953,15 +3065,20 @@ ProductsPage.prototype.translateProductList = function (percentageTranslate) {
   });
 };
 
+ProductsPage.minImages = 2;
+ProductsPage.maxImages = 20;
+
+ProductsPage.fontSizeDecrementStep = 0.5;
+
 module.exports = ProductsPage;
 
-},{"jquery":13}],9:[function(require,module,exports){
+},{"jquery":14}],10:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,287,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"mix products-");_.b(_.v(_.f("category-name",c,p,0)));_.b(" img-product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\" data-my-order=\"");_.b(_.v(_.f("order",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"loader-container\">");_.b("\n" + i);_.b("      <div class=\"loader\"></div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <img src=\"images/flasks/");_.b(_.v(_.f("flask-file",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("    <div class=\"overlay\"></div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
-},{"hogan.js/lib/template":12}],10:[function(require,module,exports){
+},{"hogan.js/lib/template":13}],11:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");if(_.s(_.f("beer-products",c,p,1),c,p,0,18,1595,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("  <div class=\"products-pages product-");_.b(_.v(_.f("beer-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("    <div class=\"products-pages-inner mdl-grid\">");_.b("\n" + i);_.b("      <div class=\"product-info mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <div class=\"product-header\">");_.b("\n" + i);_.b("          <button class=\"back-to-product\"></button>");_.b("\n" + i);_.b("          <h2 class=\"product-title\">");_.b(_.v(_.f("product-title",c,p,0)));_.b("</h2>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"info-field\">");_.b("\n" + i);_.b("          <div class=\"poetic-text\">");_.b("\n" + i);_.b("            ");_.b(_.t(_.f("poetic-text",c,p,0)));_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("          <div class=\"info-list\">");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Alkoholprosent</span><span class=\"entry-value\">");_.b(_.v(_.f("alcohol-percentage",c,p,0)));_.b(" %</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Type</span><span class=\"entry-value\">");_.b(_.v(_.f("type",c,p,0)));_.b("</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">IBU / OG</span><span class=\"entry-value\">");_.b(_.v(_.f("IBU",c,p,0)));_.b(" / ");_.b(_.v(_.f("OG",c,p,0)));_.b("°P</span></div>");_.b("\n" + i);_.b("            <div class=\"info-entry\"><span class=\"entry-type\">Serveringstemperatur</span><span class=\"entry-value\">");_.b(_.v(_.f("serving-temperature",c,p,0)));_.b("°C</span></div>");_.b("\n" + i);_.b("          </div>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"product-images mdl-cell mdl-cell--hide-tablet mdl-cell--hide-phone mdl-cell--6-col mdl-cell--8-col-tablet\">");_.b("\n" + i);_.b("        <img src=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("      <div class=\"lightbox-button mdl-cell mdl-cell--hide-desktop\">");_.b("\n" + i);_.b("        <img class=\"lightbox-button-image\" src=\"images/etiketter/button/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b("-button.png\" data-image-opened=\"images/etiketter/cropped/Graff_");_.b(_.v(_.f("file-name",c,p,0)));_.b(".png\">");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n");});c.pop();}return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
-},{"hogan.js/lib/template":12}],11:[function(require,module,exports){
+},{"hogan.js/lib/template":13}],12:[function(require,module,exports){
 var t = new (require('hogan.js/lib/template')).Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<div class=\"products-list\">");_.b("\n" + i);_.b("  <div class=\"products-display\">");_.b("\n" + i);_.b("    <div class=\"controls-filter\">");_.b("\n" + i);_.b("      <div class=\"filter-series mdl-grid\">");_.b("\n" + i);_.b("        <div class=\"mdl-cell mdl-cell--12-cola mdl-cell--hide-phone mdl-cell--hide-tablet\">");_.b("\n" + i);_.b("          <button class=\"filter button-all active\" data-filter=\"all\">ALL</button>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,335,480,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("            <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n");});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("        <div class=\"mdl-cell mdl-cell--hide-desktop\">");_.b("\n" + i);_.b("          <!-- Right aligned menu below button -->");_.b("\n" + i);_.b("          <button id=\"filters-menu-button\" class=\"mdl-button mdl-js-button mdl-button--icon\">");_.b("\n" + i);_.b("            <i class=\"material-icons\">more_vert</i>");_.b("\n" + i);_.b("          </button>");_.b("\n" + i);_.b("          <ul class=\"graff-background filter-menu mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect\"");_.b("\n" + i);_.b("              for=\"filters-menu-button\">");_.b("\n" + i);_.b("            <li class=\"filter selected mdl-menu__item\" data-filter=\"all\"><button class=\"filter button-all active\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">ALL</button></li>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1136,1398,"{{ }}")){_.rs(c,p,function(c,p,_){_.b("              <li class=\"mdl-menu__item filter\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b("\n" + i);_.b("                <button class=\"filter button-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\" data-filter=\".products-");_.b(_.v(_.f("category-name",c,p,0)));_.b("\">");_.b(_.v(_.f("category-full-name",c,p,0)));_.b("</button>");_.b("\n" + i);_.b("              </li>");_.b("\n");});c.pop();}_.b("          </ul>");_.b("\n" + i);_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("    <div class=\"products-display-inner\">");_.b("\n" + i);_.b("      <div class=\"products-image-roll\">");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow left hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-arrow right hiding hidden\"></div>");_.b("\n" + i);_.b("        <div class=\"products-image-roll-inner\">");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1766,1806,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("image-roll",c,p,"            "));});c.pop();}_.b("        </div>");_.b("\n" + i);_.b("      </div>");_.b("\n" + i);_.b("    </div>");_.b("\n" + i);_.b("  </div>");_.b("\n" + i);if(_.s(_.f("products",c,p,1),c,p,0,1883,1910,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("product-pages",c,p,"    "));});c.pop();}_.b("</div>");_.b("\n");return _.fl();;});module.exports = {  render: function () { return t.render.apply(t, arguments); },  r: function () { return t.r.apply(t, arguments); },  ri: function () { return t.ri.apply(t, arguments); }};
-},{"hogan.js/lib/template":12}],12:[function(require,module,exports){
+},{"hogan.js/lib/template":13}],13:[function(require,module,exports){
 /*
  *  Copyright 2011 Twitter, Inc.
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -3204,7 +3321,7 @@ var Hogan = {};
 })(typeof exports !== 'undefined' ? exports : Hogan);
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -12416,4 +12533,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[6]);
+},{}]},{},[7]);

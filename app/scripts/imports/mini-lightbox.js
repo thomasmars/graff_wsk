@@ -124,4 +124,4 @@
     var cache = MiniLightbox._cache = {};
 
     root.MiniLightbox = MiniLightbox;
-})();
+})(window);

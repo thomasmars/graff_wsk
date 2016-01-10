@@ -26,7 +26,6 @@ var initMixItUp = function () {
         }
       });
     }
-
   }).each(function () {
 
     // Make sure loaded is run for cached images.
@@ -47,16 +46,20 @@ var ResourceLoader = function () {
     $backgroundImages.each(function () {
 
       // Fit to height
-      if ($(this).height() < $('main').height()) {
+      if ($(this).height() < $(this).parent().height()) {
         $(this).addClass('vertical-fit');
       } // Fit to width
-      else if ($(this).width() < $('main').width()) {
+      else if ($(this).width() < $(this).parent().width()) {
         $(this).removeClass('vertical-fit');
       }
     });
   };
 
-  self.initMiniLightBox = function () {
+  self.initMiniLightBox = function (miniLightBox) {
+    debugger;
+    var $lightboxButton = $('lightbox-button-image');
+    console.log($lightboxButton);
+    console.log("mini light box ?", miniLightBox);
     $('.lightbox-button-image').each(function () {
       //($(this).get(0));
     })

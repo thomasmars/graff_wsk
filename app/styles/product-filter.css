@@ -1,5 +1,8 @@
 .filter-menu {
   padding-right: 2em;
+  max-height: 45vh;
+  overflow: hidden;
+  overflow-y: auto;
 }
 
 .controls-filter button.filter {

@@ -8,6 +8,7 @@ var ProductsPage = function (beerData) {
   this.currentIndex = 0;
   this.$mixItUp = $('.products-display');
   this.$productsList = $('.products-list');
+  this.$productsPages = $('.products-pages');
   this.totalProductPages = $('.products-pages').length;
   this.$innerImageRoll = this.$productsList.find('.products-image-roll-inner');
   this.$imageRollArrowLeft = this.$productsList.find('.products-image-roll-arrow.left');
@@ -21,15 +22,6 @@ var ProductsPage = function (beerData) {
 
   this.beerClasses = this.getBeerClasses(beerData);
 
-  self.setMinHeightInnerRoll = function () {
-    var $innerRoll = $('.products-image-roll-inner');
-    var minSize = $innerRoll.children('.mix').height();
-
-    // Set height of inner container
-    console.log("setting min height!", minSize);
-    $innerRoll.css('min-height', minSize + 'px');
-  };
-
   setTimeout(function () {
     self.initImageRollButtons();
 
@@ -39,15 +31,13 @@ var ProductsPage = function (beerData) {
 
       // Unset height of inner container
       $('.products-image-roll-inner').css('height', '');
-      self.resizeProductRoll();
     });
 
     self.$mixItUp.on('mixLoad', function () {
-      self.setMinHeightInnerRoll();
+      self.resizeWrapper();
     });
 
     self.$mixItUp.on('mixStart', function () {
-      self.setMinHeightInnerRoll();
     });
 
   }, 100);
@@ -64,14 +54,25 @@ var ProductsPage = function (beerData) {
   });
 
   $('body').on('changedSlide', function () {
-    console.log("got changedSlide!");
     self.removeFooterColor();
     self.goHome();
   });
 
-  $('.products').on('touchstart', function () {
-    console.log("started touching");
-  });
+  // Resize product roll once all images has loaded
+  var $rollImages = this.$mixItUp.find('img');
+  var imagesToLoad = $rollImages.length;
+  var imagesLoaded = 0;
+  $rollImages.load(function () {
+    imagesLoaded += 1;
+
+    if (imagesLoaded >= imagesToLoad) {
+      self.resizeWrapper();
+    }
+  }).each(function () {
+    if (this.complete) {
+      $(this).load();
+    }
+  })
 };
 
 ProductsPage.prototype.placeProductPages = function () {
@@ -81,61 +82,43 @@ ProductsPage.prototype.placeProductPages = function () {
 };
 
 ProductsPage.prototype.detectOrientation = function () {
-  console.log("orientation resize!");
   var ratio = $(window).width() / $(window).height();
-  console.log("window dim", $(window).width(), $(window).height());
-  console.log("ratio =??", ratio);
 
   this.portrait = ratio < 1;
-  console.log("is portrait ?", this.portrait);
   $('body').toggleClass('portrait', this.portrait);
 };
 
 ProductsPage.prototype.toggleOrientation = function () {
   var $body = $('body');
-  var $productsDisplay = $('.products-display');
-
-  // Was portrait
-  if (this.isPortrait) {
-    this.resizeWrapper($productsDisplay);
-  } else {
-    $body.trigger('reset-image-roll');
-    this.portraitResize($productsDisplay);
-  }
 
   // Set new state
   this.isPortrait = !this.isPortrait;
-  console.log("new state", this.isPortrait);
   $body.toggleClass('portrait', this.isPortrait);
-  this.resizeProductRoll();
-};
-
-ProductsPage.prototype.portraitResize = function ($productsDisplay) {
-  var $productsDisplay = $productsDisplay || $('.products-display');
-
-  $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
-  this.imageAmounts = 3;
 };
 
 ProductsPage.prototype.resizeWrapper = function ($productsDisplay) {
   var self = this;
   var windowWidth = $(window).width();
+  var windowHeight = $(window).height();
 
-  var $productsDisplay = $productsDisplay || $('.products-display');
+  $productsDisplay = $productsDisplay || $('.products-display');
 
+  $productsDisplay.find('.mix').css('width', '');
   if (windowWidth <= 600) {
-    $productsDisplay.removeClass('three-images four-images five-images').addClass('two-images');
     self.imageAmounts = 2;
   } else if (windowWidth <= 900) {
-    $productsDisplay.removeClass('two-images four-images five-images').addClass('three-images');
     self.imageAmounts = 3;
   } else if (windowWidth <= 1200) {
-    $productsDisplay.removeClass('two-images three-images five-images').addClass('four-images');
     self.imageAmounts = 4;
   } else {
-    $productsDisplay.removeClass('two-images three-images four-images').addClass('five-images');
     self.imageAmounts = 5;
   }
+  $productsDisplay.find('.mix').css('width', (100 / self.imageAmounts) + '%');
+
+
+  this.reduceProductRollHeight();
+  this.initImageRollButtons();
+  this.fitProductPagesFont();
 };
 
 ProductsPage.prototype.getBeerClasses = function (beerData) {
@@ -151,46 +134,33 @@ ProductsPage.prototype.getBeerClasses = function (beerData) {
   return beerArray;
 };
 
-ProductsPage.prototype.resizeProductRoll = function () {
+ProductsPage.prototype.reduceProductRollHeight = function () {
+  var self = this;
   var $productsDisplay = $('.products-display');
   var $productsList = $('.products-list');
   var $images = $productsDisplay.find('.mix');
-  var decrementPercentage = 0.5;
 
-  // Reset products display
-  $productsDisplay.removeClass('full-height');
+  if ($productsDisplay.outerHeight() > $productsList.height()) {
 
-  // Reset image height
-  $images.css('width', '');
-
-  // Reduce image size if products display is too big.
-
-  if (this.isPortrait && ($productsDisplay.outerHeight() > $productsList.height())) {
-    // Disable skewered centering since product list is taking up full height
-    $productsDisplay.addClass('full-height');
-
-
-    var reduceImageSize = function ($images, currWidth) {
-      var newWidth = currWidth - decrementPercentage;
-      console.log("reduce image size", newWidth);
-      //$images.css('width', newWidth + '%');
+    var increaseImageAmounts = function () {
+      self.imageAmounts += 1;
+      console.log("reduce image amounts");
+      console.log(self.imageAmounts);
+      $images.css('width', (100 / self.imageAmounts) + '%');
     };
 
     var imagesTooBig = true;
     var test = 0;
-    while(imagesTooBig && test < 100) {
+    while(imagesTooBig && test < 100 && self.imageAmounts < ProductsPage.maxImages) {
       $productsDisplay.addClass('disable-transitions');
-      var currWidth = $images.width() / $productsList.width() * 100;
       test += 1;
-      reduceImageSize($images, currWidth);
+      increaseImageAmounts();
       if ($productsDisplay.outerHeight() < $productsList.height()) {
         imagesTooBig = false;
       }
     }
     $productsDisplay.removeClass('disable-transitions');
   }
-
-  this.setMinHeightInnerRoll()
 };
 
 ProductsPage.prototype.loadClones = function () {
@@ -214,6 +184,7 @@ ProductsPage.prototype.loadClones = function () {
 
       if (clonesLoaded >= totalClones) {
         self.clonesLoaded = true;
+        self.$productsPages = $('.products-pages');
       }
     });
   });
@@ -224,7 +195,6 @@ ProductsPage.prototype.initProductsButtons = function () {
 };
 
 ProductsPage.prototype.initImageRollButtons = function () {
-  console.log("init image roll buttons");
   var self = this;
   var $mixElements = this.$productsList.find('.mix');
   var scrollAmount = $mixElements.get(0).offsetWidth;
@@ -238,7 +208,6 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowLeft.unbind('click')
     .click(function () {
-      console.log("clicked arrow left");
 
       // Already at min index
       if (self.currentImageRollIndex === 0) {
@@ -261,26 +230,16 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   this.$imageRollArrowRight.unbind('click')
     .click(function () {
-      console.log("clicked arrow right");
-
-      console.log("image roll index, ", self.currentImageRollIndex);
-      console.log("visible elements", visibleElements);
-      console.log("roll elements", rollElements);
 
       // All images already shown
       if (self.currentImageRollIndex + 1 + visibleElements > rollElements) {
         return;
       }
 
-      // Decrease current image roll index
+      // Increase current image roll index
       self.currentImageRollIndex += 1;
 
-
-      console.log("current image roll index", self.currentImageRollIndex);
-      console.log("visible elements", visibleElements);
-      console.log("roll elements", rollElements);
       if (self.currentImageRollIndex + visibleElements >= rollElements) {
-        console.log("fade to hidden ?");
         self.fadeToHidden(self.$imageRollArrowRight);
       }
       self.fadeToShown(self.$imageRollArrowLeft);
@@ -288,7 +247,6 @@ ProductsPage.prototype.initImageRollButtons = function () {
       // Negative translation
       scrollAmount = $mixElements.get(0).offsetWidth;
 
-      console.log("setting image roll translate");
       self.setImageRollTranslate(-1 * self.currentImageRollIndex * scrollAmount);
     });
 
@@ -298,17 +256,40 @@ ProductsPage.prototype.initImageRollButtons = function () {
 
   // Handle visibility of buttons
   self.fadeToToggle(this.$imageRollArrowLeft, (this.currentImageRollIndex === 0));
+  console.log("current image roll index", this.currentImageRollIndex);
+  console.log("visible elements", visibleElements);
+  console.log("roll elements", rollElements);
   self.fadeToToggle(this.$imageRollArrowRight, (this.currentImageRollIndex + visibleElements >= rollElements));
   self.rollElements = rollElements;
 };
 
 ProductsPage.prototype.setImageRollTranslate = function (value) {
-  var self = this;
   value = value ? value : 0;
   this.$innerImageRoll.css({
     '-webkit-transform': 'translateX(' + value + 'px)',
     transform: 'translateX(' + value + 'px)'
   })
+};
+
+ProductsPage.prototype.fitProductPagesFont = function () {
+  var self = this;
+
+  // Reset font size
+  this.$productsPages.css('font-size', '');
+  var currentFontSize = parseFloat(this.$productsPages.css('font-size'));
+
+
+  if (this.$productsPages.children('.products-pages-inner').outerHeight() > this.$productsPages.height()) {
+
+    var reduceFontSize = function () {
+      currentFontSize -= ProductsPage.fontSizeDecrementStep;
+      self.$productsPages.css('font-size', currentFontSize + 'px');
+    };
+
+    while(this.$productsPages.children('.products-pages-inner').outerHeight() > this.$productsPages.height()) {
+      reduceFontSize();
+    }
+  }
 };
 
 ProductsPage.prototype.getImageAmounts = function () {
@@ -324,9 +305,7 @@ ProductsPage.prototype.fadeToToggle = function ($element, boolean) {
 };
 
 ProductsPage.prototype.fadeToHidden = function ($element) {
-  console.log("fading to hidden", $element);
   $element.addClass('hiding').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (f) {
-    console.log("on animation end...");
     $element.addClass('hidden');
 
     // Make sure event is only triggered once.
@@ -415,5 +394,10 @@ ProductsPage.prototype.translateProductList = function (percentageTranslate) {
     transform: 'translateX(' + percentageTranslate + '%)'
   });
 };
+
+ProductsPage.minImages = 2;
+ProductsPage.maxImages = 20;
+
+ProductsPage.fontSizeDecrementStep = 0.5;
 
 module.exports = ProductsPage;

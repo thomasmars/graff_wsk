@@ -2,6 +2,7 @@
   display: none;
   position: relative;
   width: 300px;
+  float: left;
 }
 
 .products-display img {
@@ -75,21 +76,4 @@
 .controls-filter .filter-series {
   font-family: Jaapokki, sans-serif;
   display: inline-block;
-}
-
-/* Amount of images to display */
-.products-display.two-images .mix {
-  width: 49.9%;
-}
-
-.products-display.three-images .mix {
-  width: 32.9%;
-}
-
-.products-display.four-images .mix {
-  width: 24.5%;
-}
-
-.products-display.five-images .mix {
-  width: 19.7%;
 }
