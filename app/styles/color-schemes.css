@@ -1,0 +1,50 @@
+/* Color schemes */
+
+.graff-background {
+  background: #FAF6E2;
+}
+
+.products {
+  background: #FAF6E2;
+}
+
+.footer-inner,
+.products-pages .back-to-product,
+.products-list .products-image-roll-arrow {
+  background: #F6AC26;
+}
+
+body.dunkel .footer-inner,
+.products-pages.product-dunkel .product-header .back-to-product {
+  background-color: #915F2F;
+}
+
+body.helles .footer-inner,
+.products-pages.product-helles .product-header .back-to-product {
+  background-color: #E3A11F;
+}
+
+body.portland .footer-inner,
+.products-pages.product-portland .product-header .back-to-product {
+  background-color: #C77716;
+}
+
+body.redhead .footer-inner,
+.products-pages.product-redhead .product-header .back-to-product {
+  background-color: #B73B24;
+}
+
+body.session .footer-inner,
+.products-pages.product-session .product-header .back-to-product {
+  background-color: #14A29B;
+}
+
+body.stillehav .footer-inner,
+.products-pages.product-stillehav .product-header .back-to-product {
+  background-color: #219DB5;
+}
+
+body.stout .footer-inner,
+.products-pages.product-stout .product-header .back-to-product {
+  background-color: #523423;
+}

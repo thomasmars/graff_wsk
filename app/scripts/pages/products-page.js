@@ -2,6 +2,7 @@
  * Created by thoma_000 on 19.09.2015.
  */
 var $ = require('jquery');
+require('../imports/mini-lightbox');
 var ProductsPage = function (beerData) {
   var self = this;
 
@@ -51,9 +52,8 @@ var ProductsPage = function (beerData) {
     // Handle visibility of buttons
     self.fadeToToggle(self.$imageRollArrowLeft, (self.currentImageRollIndex === 0));
     self.fadeToToggle(self.$imageRollArrowRight, (self.currentImageRollIndex + self.getImageAmounts() >= self.rollElements));
-  });
 
-  $('body').on('changedSlide', function () {
+  }).on('changedSlide', function () {
     self.removeFooterColor();
     self.goHome();
   });
@@ -73,6 +73,12 @@ var ProductsPage = function (beerData) {
       $(this).load();
     }
   })
+};
+
+
+ProductsPage.prototype.initLightBox = function () {
+  var $lightboxButtons = this.$productsPages.find('.lightbox-button-image');
+  window.MiniLightbox($lightboxButtons);
 };
 
 ProductsPage.prototype.placeProductPages = function () {
@@ -118,7 +124,7 @@ ProductsPage.prototype.resizeWrapper = function ($productsDisplay) {
 
   this.reduceProductRollHeight();
   this.initImageRollButtons();
-  this.fitProductPagesFont();
+  // this.fitProductPagesFont();
 };
 
 ProductsPage.prototype.getBeerClasses = function (beerData) {
@@ -188,6 +194,8 @@ ProductsPage.prototype.loadClones = function () {
       }
     });
   });
+
+  return this;
 };
 
 ProductsPage.prototype.initProductsButtons = function () {

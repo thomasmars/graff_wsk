@@ -2,8 +2,12 @@
  * Created by thoma_000 on 01.10.2015.
  */
 var $ = require('jquery');
+var googleMapsApi = require('google-maps-api')('AIzaSyDtNRjBxS2k_MywbRKdrgM8edIx8DSeapA', ['places']);
 var ContactPage = function () {
-  this.initGoogleMap();
+  var self = this;
+  googleMapsApi().then(function () {
+    self.initGoogleMap();
+  });
 };
 
 ContactPage.prototype.initGoogleMap = function () {

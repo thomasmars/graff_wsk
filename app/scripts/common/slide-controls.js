@@ -6,6 +6,21 @@ var SlideControls = function ($wrapper) {
   this.$wrapper = $wrapper;
   this.initScrollToElementAnchors();
   this.addScrollToClosestElementListener();
+/*  console.log($);
+  $wrapper.fullpage({
+    bottomPadding: '64px',
+    onLeave: function () {
+      $('body').trigger('changedSlide');
+    }
+  });*/
+};
+
+/**
+ *
+ */
+SlideControls.prototype.jumpTo = function (section, slide) {
+  //$.fn.fullpage.moveTo(section, (slide ? slide : 0));
+  //$.fn.fullpage.moveSectionDown();
 };
 
 /**
@@ -14,6 +29,7 @@ var SlideControls = function ($wrapper) {
 SlideControls.prototype.addScrollToClosestElementListener = function () {
   var self = this;
   this.$wrapper.scroll(function (e) {
+    console.log("scroll canceled ?");
 
     // Auto scrolling is performed
     clearTimeout(self.scrollTimer);
@@ -21,7 +37,15 @@ SlideControls.prototype.addScrollToClosestElementListener = function () {
       e.preventDefault();
       return false;
     }
+    console.log("setting timeout!");
+    var startTime = new Date().getTime();
+    console.log("start time ", startTime);
+    console.log("wtf is timeout ?", self.scrollTimer);
     self.scrollTimer = setTimeout(function () {
+      var endTime = new Date().getTime();
+      console.log("end time", endTime);
+      console.log("time elapsed ", endTime - startTime);
+      console.log("timeout done");
       self.scrollToClosestTarget();
     }, 500);
   });
@@ -32,12 +56,17 @@ SlideControls.prototype.addScrollToClosestElementListener = function () {
  * @param {number} [timeout] Timeout in ms before scrolling.
  */
 SlideControls.prototype.scrollToClosestTarget = function (timeout) {
+  var self = this;
   var $closest = this.findClosestScrollTarget();
 
+  console.log("scroll timeout ?", timeout);
   if (timeout) {
-    setTimeout(() => this.scrollToElement($closest), timeout);
+    setTimeout(function () {
+      self.scrollToElement($closest)
+    }, timeout);
   }
   else {
+    console.log("scroll to element!");
     this.scrollToElement($closest);
   }
 };
@@ -94,6 +123,8 @@ SlideControls.prototype.slide = function (slideUp) {
  */
 SlideControls.prototype.scrollToElement = function ($element, instantScroll) {
   var self = this;
+  console.trace();
+  console.log("instantscroll ?", instantScroll);
   this.$wrapper.children().removeClass('active');
   var currentScroll = this.$wrapper.scrollTop();
   var scrollTo = $element.offset().top - this.$wrapper.offset().top + currentScroll;
@@ -104,6 +135,7 @@ SlideControls.prototype.scrollToElement = function ($element, instantScroll) {
     }, {
       duration: instantScroll ? 0 : 500,
       complete: function () {
+        console.log("complete animation, timeout before autoscroll");
         setTimeout(function () {
           if (!self.currentScrollElement || self.currentScrollElement.get(0) !== $element.get(0)) {
             $('body').trigger('changedSlide');

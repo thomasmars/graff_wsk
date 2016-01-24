@@ -40,11 +40,16 @@ const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
 var browserify = require('browserify');
-//var browserify = require('browserify-mustache');
 var watchify = require('watchify');
 var source = require('vinyl-source-stream');
 
 var dist = false; // set to true when `default` task is run
+
+var remote = {
+  googleMaps: {
+
+  }
+}
 
 // Lint JavaScript
 gulp.task('lint', () =>
@@ -73,8 +78,9 @@ gulp.task('fonts', () => {
 });
 
 gulp.task('watch', ['scripts', 'styles'], () => {
-  gulp.watch(['app/styles/*.css'], ['styles']);
+  gulp.watch(['app/styles/**/*.css'], ['styles']);
   gulp.watch(['app/scripts/**/*.js'], ['scripts']);
+  gulp.watch(['app/external/*.js'], ['scripts']);
   gulp.watch(['app/scripts/**/*.mustache'], ['scripts']);
 });
 
@@ -106,8 +112,10 @@ gulp.task('styles', () => {
 
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'app/styles/*.scss',
-    'app/styles/*.css'
+    'app/external/*.scss',
+    'app/external/*.css',
+    'app/styles/**/*.scss',
+    'app/styles/**/*.css'
   ])
     .pipe($.newer('.tmp/styles'))
     .pipe($.sourcemaps.init())

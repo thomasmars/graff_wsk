@@ -54,16 +54,6 @@ var ResourceLoader = function () {
       }
     });
   };
-
-  self.initMiniLightBox = function (miniLightBox) {
-    debugger;
-    var $lightboxButton = $('lightbox-button-image');
-    console.log($lightboxButton);
-    console.log("mini light box ?", miniLightBox);
-    $('.lightbox-button-image').each(function () {
-      //($(this).get(0));
-    })
-  };
 };
 
 module.exports = ResourceLoader;

@@ -1,15 +1,13 @@
 /**
  * Created by Thomas Marstrander on 20.08.2015.
  */
-(function () {
-  var self = this;
+var Graff = function () {
   var $ = require('jquery');
   var SlideControls = require('./slide-controls');
   var GraffHeader = require('./header');
   var ResourceLoader = require('./resource-loader');
   var ProductsPage = require('../pages/products-page');
   var ContactPage = require('../pages/contact-page');
-  require('../imports/mini-lightbox');
 
   // Mustache templates
   var productsMain = require('../templates/products-main.mustache');
@@ -18,6 +16,7 @@
 
   $(document).ready(function(){
     var $wrapper = $('.wrapper');
+    var resourceLoader;
 
     // Load Mustache content
     $.getJSON('data/products.json', function (view) {
@@ -31,14 +30,11 @@
         .then(function () {
 
           // Init
-          var resourceLoader = new ResourceLoader();
+          resourceLoader = new ResourceLoader();
           resourceLoader.resizeBackgroundImages();
-          //resourceLoader.initMiniLightBox(MiniLightBox);
-          var $lightboxButton = $('.lightbox-button-image');
-          window.MiniLightbox($lightboxButton);
           var productsPage = new ProductsPage(view);
           var slideControls = new SlideControls($wrapper);
-          new GraffHeader($wrapper, productsPage);
+          new GraffHeader($wrapper, productsPage, slideControls);
           new ContactPage();
 
           // Resize products page
@@ -50,8 +46,9 @@
           });
           $(window).resize();
 
-          // Finally load clones to create 'product roll'
-          productsPage.loadClones();
+          // Finally load clones and lightbox to product pages
+          productsPage.loadClones()
+            .initLightBox();
         });
     });
   });
@@ -60,4 +57,6 @@
     event.preventDefault();
   });
 
-})();
+};
+
+module.exports = Graff;

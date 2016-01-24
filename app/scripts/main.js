@@ -82,5 +82,7 @@
 
   global.jQuery = require('jquery');
   require('./imports/jquery.mixitup.js', jQuery);
-  require('./common/graff.js');
+  var Graff = require('./common/graff.js');
+  new Graff();
+  require('../external/material.min');
 })();

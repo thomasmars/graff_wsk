@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="">
+<html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,14 +11,13 @@
     <meta name="msapplication-tap-highlight" content="no">
 
     <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
-    <meta name="msapplication-TileColor" content="#2F3BA2">
+    <meta name="msapplication-TileColor" content="#FAF6E2">
 
     <!-- Color the status bar on mobile devices -->
-    <meta name="theme-color" content="#2F3BA2">
+    <meta name="theme-color" content="#FAF6E2">
 
     <!-- Material Design Lite page styles -->
-    <link rel="stylesheet" href="./external/material.min.css" />
+<!--    <link rel="stylesheet" href="./external/material.min.css" />-->
 
     <!-- Material Design icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -45,9 +44,9 @@
       <div class="mdl-layout__drawer mdl-layout--small-screen-only">
         <img class="drawer-logo" src="images/cropped-logo.png">
         <nav class="mdl-navigation">
-          <a href="#home" class="mdl-navigation__link">Home</a>
-          <a href="#products" class="mdl-navigation__link">Products</a>
-          <a href="#contact" class="mdl-navigation__link">Contact</a>
+          <a href="#home" class="mdl-navigation__link nav-home">Home</a>
+          <a href="#products" class="mdl-navigation__link nav-products">Products</a>
+          <a href="#contact" class="mdl-navigation__link nav-contact">Contact</a>
         </nav>
       </div>
       <main class="mdl-layout__content wrapper">
@@ -93,9 +92,6 @@
     <div class="footer">
       <div class="footer-inner"></div>
     </div>
-
-    <script src="./external/material.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtNRjBxS2k_MywbRKdrgM8edIx8DSeapA&libraries=places"></script>
     <script src="build/bundle.js"></script>
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
     <script>
