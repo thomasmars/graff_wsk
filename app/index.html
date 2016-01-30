@@ -16,82 +16,53 @@
     <!-- Color the status bar on mobile devices -->
     <meta name="theme-color" content="#FAF6E2">
 
-    <!-- Material Design Lite page styles -->
-<!--    <link rel="stylesheet" href="./external/material.min.css" />-->
-
-    <!-- Material Design icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
-
     <!-- Your styles -->
     <link rel="stylesheet" href="build/style.min.css">
   </head>
-  <body class="mdl-base">
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-      <header class="mdl-layout__header mdl-layout__header--waterfall mdl-color-text--black header-complete">
-        <div class="mdl-layout__header-row menu-main">
-          <nav class="mdl-navigation header-navigation mdl-layout--large-screen-only">
-            <a href="#home" class="button-home">Home</a>
-            <a href="#products" class="button-products">Products</a>
-            <a href="#contact" class="button-contact">Contact</a>
-          </nav>
-          <div class="mdl-layout--small-screen-only">
-            <div class="mdl-layout-spacer"></div>
-            <img class="small-logo" src="images/logo-simple.png">
-          </div>
+  <body>
+    <main class="wrapper">
+      <div class="main-page home" id="home">
+        <div class="header-logo-container">
+          <img class="header-logo" src="./images/logo.png" />
         </div>
-      </header>
-      <div class="mdl-layout__drawer mdl-layout--small-screen-only">
-        <img class="drawer-logo" src="images/cropped-logo.png">
-        <nav class="mdl-navigation">
-          <a href="#home" class="mdl-navigation__link nav-home">Home</a>
-          <a href="#products" class="mdl-navigation__link nav-products">Products</a>
-          <a href="#contact" class="mdl-navigation__link nav-contact">Contact</a>
-        </nav>
+        <div class="img-home-container">
+          <img class="img-home img-backgrounds" src="images/eske-xs.jpg">
+        </div>
       </div>
-      <main class="mdl-layout__content wrapper">
-        <div class="main-page home mdl-grid--no-spacing" id="home">
-          <div class="mdl-cell mdl-cell--12-col mdl-cell--hide-tablet mdl-cell--hide-phone header-logo-container">
-            <img class="header-logo" src="./images/logo.png" />
-          </div>
-          <div class="mdl-cell mdl-cell--12-col img-home-container">
-            <img class="img-home img-backgrounds" src="images/eske-xs.jpg">
-          </div>
-        </div>
-        <div class="main-page products mdl-grid" id="products"></div>
-        <div class="main-page contact" id="contact">
-          <img class="img-contact img-backgrounds" src="images/gruppebilde-xs.jpg">
-          <div class="contact-info">
-            <div class="contact-info-inner">
-              <div class="contact-info-header">Besøk bryggeriet</div>
-              <div class="contact-info-entry">
-                <div class="contact-info-icon home-icon"></div>
-                <div class="text-field">
-                  <div class="text-field-header">Storgata 101</div>
-                  <div class="text-field-info">Tromsø sentrum</div>
-                </div>
+      <div class="main-page products" id="products"></div>
+      <div class="main-page contact" id="contact">
+        <img class="img-contact img-backgrounds" src="images/gruppebilde-xs.jpg">
+        <div class="contact-info">
+          <div class="contact-info-inner">
+            <div class="contact-info-header">Besøk bryggeriet</div>
+            <div class="contact-info-entry">
+              <div class="contact-info-icon home-icon"></div>
+              <div class="text-field">
+                <div class="text-field-header">Storgata 101</div>
+                <div class="text-field-info">Tromsø sentrum</div>
               </div>
-              <div class="contact-info-header">Følg oss på instagraff</div>
-              <div class="contact-info-entry">
-                <div class="contact-info-icon instagram-icon"></div>
-                <div class="text-field">
-                  <div class="text-field-header">Beer with us!</div>
-                  <div class="text-field-info"><a href="https://instagram.com/graffbrygghus/" target="_blank">@graffbrygghus</a></div>
-                </div>
+            </div>
+            <div class="contact-info-header">Følg oss på instagraff</div>
+            <div class="contact-info-entry">
+              <div class="contact-info-icon instagram-icon"></div>
+              <div class="text-field">
+                <div class="text-field-header">Beer with us!</div>
+                <div class="text-field-info"><a href="https://instagram.com/graffbrygghus/" target="_blank">@graffbrygghus</a></div>
               </div>
             </div>
           </div>
-          <div class="google-map-frame">
-            <div class="google-map-frame-inner">
-              <div class="google-map"></div>
-            </div>
+        </div>
+        <div class="google-map-frame">
+          <div class="google-map-frame-inner">
+            <div class="google-map"></div>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
     </div>
-    <div class="footer">
+    <footer class="footer">
       <div class="footer-inner"></div>
-    </div>
+    </footer>
     <script src="build/bundle.js"></script>
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
     <script>

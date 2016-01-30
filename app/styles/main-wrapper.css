@@ -21,15 +21,10 @@
 body {
   font-family: Jaapokki, sans-serif;
   color: #000;
+  margin: 0;
 }
 
 .wrapper {
   background: #FAF6E2;
   height: calc(100vh - 64px);
-}
-
-@media (max-width: 839px) {
-  .wrapper {
-    height: calc(100vh - 56px);
-  }
 }

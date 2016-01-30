@@ -1,7 +1,9 @@
 {{#beer-products}}
   <div class="products-pages product-{{beer-name}}">
-    <div class="products-pages-inner mdl-grid">
-      <div class="product-info mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet">
+    <div class="products-pages-inner-roll-arrow left"></div>
+    <div class="products-pages-inner-roll-arrow right"></div>
+    <div class="products-pages-inner">
+      <div class="product-info">
         <div class="product-header">
           <button class="back-to-product"></button>
           <h2 class="product-title">{{product-title}}</h2>
@@ -10,18 +12,30 @@
           <div class="poetic-text">
             {{{poetic-text}}}
           </div>
-          <div class="info-list">
-            <div class="info-entry"><span class="entry-type">Alkoholprosent</span><span class="entry-value">{{alcohol-percentage}} %</span></div>
-            <div class="info-entry"><span class="entry-type">Type</span><span class="entry-value">{{type}}</span></div>
-            <div class="info-entry"><span class="entry-type">IBU / OG</span><span class="entry-value">{{IBU}} / {{OG}}°P</span></div>
-            <div class="info-entry"><span class="entry-type">Serveringstemperatur</span><span class="entry-value">{{serving-temperature}}°C</span></div>
-          </div>
+          <table class="info-list">
+            <tr class="info-entry">
+              <th class="entry-type">Alkoholprosent</th>
+              <td class="entry-value">{{alcohol-percentage}} %</td>
+            </tr>
+            <tr class="info-entry">
+              <th class="entry-type">Type</th>
+              <td class="entry-value">{{type}}</td>
+            </tr>
+            <tr class="info-entry">
+              <th class="entry-type">IBU / OG</th>
+              <td class="entry-value">{{IBU}} / {{OG}}°P</td>
+            </tr>
+            <tr class="info-entry">
+              <th class="entry-type">Serveringstemperatur</th>
+              <td class="entry-value">{{serving-temperature}}°C</td>
+            </tr>
+          </table>
         </div>
       </div>
-      <div class="product-images mdl-cell mdl-cell--hide-tablet mdl-cell--hide-phone mdl-cell--6-col mdl-cell--8-col-tablet">
+      <div class="product-images">
         <img src="images/etiketter/cropped/Graff_{{file-name}}.png">
       </div>
-      <div class="lightbox-button mdl-cell mdl-cell--hide-desktop">
+      <div class="lightbox-button">
         <img class="lightbox-button-image" src="images/etiketter/button/Graff_{{file-name}}-button.png" data-image-opened="images/etiketter/cropped/Graff_{{file-name}}.png">
       </div>
     </div>

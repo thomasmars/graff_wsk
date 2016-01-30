@@ -52,7 +52,8 @@
     "extends": "google"
   },
   "dependencies": {
-    "gulp": "^3.9.0",
-    "material-design-lite": "^1.0.6"
+    "fullpage.js": "^2.7.7",
+    "google-maps-api": "^2.0.0",
+    "gulp": "^3.9.0"
   }
 }

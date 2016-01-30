@@ -45,12 +45,6 @@ var source = require('vinyl-source-stream');
 
 var dist = false; // set to true when `default` task is run
 
-var remote = {
-  googleMaps: {
-
-  }
-}
-
 // Lint JavaScript
 gulp.task('lint', () =>
   gulp.src('app/scripts/**/*.js')
@@ -79,6 +73,7 @@ gulp.task('fonts', () => {
 
 gulp.task('watch', ['scripts', 'styles'], () => {
   gulp.watch(['app/styles/**/*.css'], ['styles']);
+  gulp.watch(['app/style-overrides/**/*.css'], ['styles']);
   gulp.watch(['app/scripts/**/*.js'], ['scripts']);
   gulp.watch(['app/external/*.js'], ['scripts']);
   gulp.watch(['app/scripts/**/*.mustache'], ['scripts']);
@@ -112,10 +107,9 @@ gulp.task('styles', () => {
 
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'app/external/*.scss',
-    'app/external/*.css',
     'app/styles/**/*.scss',
-    'app/styles/**/*.css'
+    'app/styles/**/*.css',
+    'app/style-overrides/**/*.css'
   ])
     .pipe($.newer('.tmp/styles'))
     .pipe($.sourcemaps.init())
@@ -144,38 +138,8 @@ gulp.task('scripts', function(){
       // destination changes when `dist` is set to true
       .pipe(gulp.dest( dist ? 'dist/scripts' : './app/build/' ));
   };
-  // rebundle on change
   return bundle();
 });
-
-// Concatenate and minify JavaScript. Optionally transpiles ES2015 code to ES5.
-// to enables ES2015 support remove the line `"only": "gulpfile.babel.js",` in the
-// `.babelrc` file.
-/*gulp.task('scripts', () =>
-    gulp.src([
-      // Note: Since we are not using useref in the scripts build pipeline,
-      //       you need to explicitly list your scripts here in the right order
-      //       to be correctly concatenated
-      './app/scripts/main.js'
-      // Oth
-      // er scripts
-    ])
-      .pipe(browserify({
-        insertGlobals : true,
-        debug : true
-      }))
-      .pipe($.newer('.tmp/scripts'))
-      .pipe($.sourcemaps.init())
-      .pipe($.babel())
-      .pipe($.sourcemaps.write())
-      .pipe(gulp.dest('.tmp/scripts'))
-      .pipe($.concat('main.min.js'))
-      .pipe($.uglify({preserveComments: 'some'}))
-      // Output files
-      .pipe($.size({title: 'scripts'}))
-      .pipe($.sourcemaps.write('.'))
-      .pipe(gulp.dest('dist/scripts'))
-);*/
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', () => {
@@ -255,7 +219,7 @@ gulp.task('default', ['clean'], cb =>
 // Run PageSpeed Insights
 gulp.task('pagespeed', cb =>
   // Update the below URL to the public URL of your site
-  pagespeed('example.com', {
+  pagespeed('www.graffbrygghus.no/staging/', {
     strategy: 'mobile'
     // By default we use the PageSpeed Insights free (no API key) tier.
     // Use a Google Developer API key if you have one: http://goo.gl/RkN0vE

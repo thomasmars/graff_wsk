@@ -1,9 +1,6 @@
 // MiniLightbox
 // </> with <3 by Ionică Bizău
 (function (root) {
-
-  console.log("this", this);
-  console.log("root", root);
     root.addEventListener("scroll", function () {
         MiniLightbox.close();
     });

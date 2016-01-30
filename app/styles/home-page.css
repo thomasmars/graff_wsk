@@ -1,12 +1,16 @@
 .header-logo-container {
   height: 30vh;
   margin: 0;
+  position: relative;
 }
 
 .header-logo {
   display: block;
-  height:100%;
-  margin: auto;
+  height: 60%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .img-home-container {
@@ -15,8 +19,3 @@
   overflow: hidden;
 }
 
-@media (max-width: 839px) {
-  .img-home-container {
-    height: 100%;
-  }
-}
